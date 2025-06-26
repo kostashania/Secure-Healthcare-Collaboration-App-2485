@@ -1,20 +1,20 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { useAuth } from '../../contexts/AuthContext';
-import SafeIcon from '../../common/SafeIcon';
-import * as FiIcons from 'react-icons/fi';
+import React from 'react'
+import { motion } from 'framer-motion'
+import { useAuth } from '../../contexts/AuthContext'
+import SafeIcon from '../../common/SafeIcon'
+import * as FiIcons from 'react-icons/fi'
 
-const { FiHome, FiUsers, FiFileText, FiCalendar, FiCheckSquare, FiMessageCircle } = FiIcons;
+const { FiHome, FiUsers, FiFileText, FiCalendar, FiCheckSquare, FiSettings, FiEye, FiDollarSign, FiShield } = FiIcons
 
 const Navigation = ({ activeTab, setActiveTab }) => {
-  const { user } = useAuth();
+  const { profile } = useAuth()
 
   const getNavItems = () => {
     const baseItems = [
       { id: 'dashboard', label: 'Dashboard', icon: FiHome }
-    ];
+    ]
 
-    switch (user?.role) {
+    switch (profile?.role) {
       case 'patient':
         return [
           ...baseItems,
@@ -22,37 +22,55 @@ const Navigation = ({ activeTab, setActiveTab }) => {
           { id: 'documents', label: 'Documents', icon: FiFileText },
           { id: 'appointments', label: 'Appointments', icon: FiCalendar },
           { id: 'tasks', label: 'Tasks', icon: FiCheckSquare }
-        ];
+        ]
       case 'doctor':
         return [
           ...baseItems,
           { id: 'patients', label: 'Patients', icon: FiUsers },
           { id: 'appointments', label: 'Appointments', icon: FiCalendar },
-          { id: 'tasks', label: 'Tasks', icon: FiCheckSquare }
-        ];
+          { id: 'tasks', label: 'Tasks', icon: FiCheckSquare },
+          { id: 'documents', label: 'Documents', icon: FiFileText }
+        ]
       case 'nurse':
         return [
           ...baseItems,
           { id: 'patients', label: 'Patients', icon: FiUsers },
           { id: 'tasks', label: 'Tasks', icon: FiCheckSquare },
           { id: 'documents', label: 'Documents', icon: FiFileText }
-        ];
+        ]
+      case 'admin':
+        return [
+          { id: 'admin', label: 'Admin Panel', icon: FiShield },
+          { id: 'users', label: 'Users', icon: FiUsers },
+          { id: 'advertisements', label: 'Advertisements', icon: FiEye },
+          { id: 'analytics', label: 'Analytics', icon: FiDollarSign },
+          { id: 'settings', label: 'Settings', icon: FiSettings }
+        ]
+      case 'sponsor':
+        return [
+          { id: 'sponsor', label: 'Sponsor Panel', icon: FiEye },
+          { id: 'advertisements', label: 'My Ads', icon: FiEye },
+          { id: 'packages', label: 'Packages', icon: FiDollarSign },
+          { id: 'analytics', label: 'Analytics', icon: FiDollarSign }
+        ]
       default:
-        return baseItems;
+        return baseItems
     }
-  };
+  }
 
   const getRoleColor = (role) => {
     switch (role) {
-      case 'patient': return 'patient';
-      case 'doctor': return 'doctor';
-      case 'nurse': return 'nurse';
-      default: return 'gray';
+      case 'patient': return 'patient'
+      case 'doctor': return 'doctor'
+      case 'nurse': return 'nurse'
+      case 'admin': return 'red'
+      case 'sponsor': return 'green'
+      default: return 'gray'
     }
-  };
+  }
 
-  const navItems = getNavItems();
-  const roleColor = getRoleColor(user?.role);
+  const navItems = getNavItems()
+  const roleColor = getRoleColor(profile?.role)
 
   return (
     <nav className="bg-white border-t border-gray-200 sm:border-t-0 sm:border-r">
@@ -75,7 +93,7 @@ const Navigation = ({ activeTab, setActiveTab }) => {
         ))}
       </div>
     </nav>
-  );
-};
+  )
+}
 
-export default Navigation;
+export default Navigation
