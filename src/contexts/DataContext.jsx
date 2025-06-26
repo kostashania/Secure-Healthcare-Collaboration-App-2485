@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { useAuth } from './AuthContext'
-import { dbHelpers } from '../lib/supabase'
 import { toast } from 'react-toastify'
 
 const DataContext = createContext({})
@@ -13,132 +12,294 @@ export const useData = () => {
   return context
 }
 
+// Demo data
+const DEMO_DATA = {
+  users: [
+    {
+      id: 'admin-1',
+      full_name: 'Admin User',
+      email: 'admin@demo.com',
+      role: 'admin',
+      is_active: true,
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 'doctor-1',
+      full_name: 'Dr. Sarah Johnson',
+      email: 'doctor@demo.com',
+      role: 'doctor',
+      specialization: 'Cardiology',
+      is_active: true,
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 'nurse-1',
+      full_name: 'Maria Rodriguez',
+      email: 'nurse@demo.com',
+      role: 'nurse',
+      specialization: 'Emergency Care',
+      is_active: true,
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 'patient-1',
+      full_name: 'John Smith',
+      email: 'patient@demo.com',
+      role: 'patient',
+      is_active: true,
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 'sponsor-1',
+      full_name: 'MedTech Solutions',
+      email: 'sponsor@demo.com',
+      role: 'sponsor',
+      is_active: true,
+      created_at: new Date().toISOString()
+    }
+  ],
+  documents: [
+    {
+      id: 'doc-1',
+      title: 'Blood Test Results',
+      description: 'Complete blood count and chemistry panel',
+      type: 'lab_result',
+      patient_id: 'patient-1',
+      uploaded_by: 'doctor-1',
+      url: '#',
+      created_at: new Date(Date.now() - 86400000).toISOString()
+    },
+    {
+      id: 'doc-2',
+      title: 'Prescription - Medication',
+      description: 'Blood pressure medication prescription',
+      type: 'prescription',
+      patient_id: 'patient-1',
+      uploaded_by: 'doctor-1',
+      url: '#',
+      created_at: new Date(Date.now() - 172800000).toISOString()
+    }
+  ],
+  tasks: [
+    {
+      id: 'task-1',
+      title: 'Take Blood Pressure',
+      description: 'Monitor patient blood pressure twice daily',
+      patient_id: 'patient-1',
+      assigned_to: 'nurse-1',
+      assigned_by: 'doctor-1',
+      status: 'pending',
+      priority: 'high',
+      due_date: new Date(Date.now() + 86400000).toISOString(),
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 'task-2',
+      title: 'Follow-up Call',
+      description: 'Check on patient recovery progress',
+      patient_id: 'patient-1',
+      assigned_to: 'nurse-1',
+      assigned_by: 'doctor-1',
+      status: 'completed',
+      priority: 'medium',
+      created_at: new Date(Date.now() - 86400000).toISOString()
+    }
+  ],
+  appointments: [
+    {
+      id: 'apt-1',
+      title: 'Cardiology Consultation',
+      patient_id: 'patient-1',
+      provider_id: 'doctor-1',
+      appointment_date: new Date(Date.now() + 172800000).toISOString(),
+      duration: 30,
+      type: 'consultation',
+      status: 'scheduled',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 'apt-2',
+      title: 'Follow-up Visit',
+      patient_id: 'patient-1',
+      provider_id: 'doctor-1',
+      appointment_date: new Date(Date.now() + 604800000).toISOString(),
+      duration: 15,
+      type: 'follow_up',
+      status: 'scheduled',
+      created_at: new Date().toISOString()
+    }
+  ],
+  adPackages: [
+    {
+      id: 'pkg-1',
+      name: 'Monthly Basic',
+      description: 'Basic advertising package for 1 month',
+      duration_months: 1,
+      price_euros: 2000, // €20.00
+      sort_order: 1,
+      is_active: true,
+      features: {
+        max_ads: 3,
+        priority: 'normal',
+        analytics: true
+      }
+    },
+    {
+      id: 'pkg-2',
+      name: 'Quarterly Pro',
+      description: 'Professional package for 3 months with better positioning',
+      duration_months: 3,
+      price_euros: 5000, // €50.00
+      sort_order: 2,
+      is_active: true,
+      features: {
+        max_ads: 10,
+        priority: 'high',
+        analytics: true,
+        custom_targeting: true
+      }
+    },
+    {
+      id: 'pkg-3',
+      name: 'Semi-Annual Premium',
+      description: 'Premium package for 6 months with priority placement',
+      duration_months: 6,
+      price_euros: 8500, // €85.00
+      sort_order: 3,
+      is_active: true,
+      features: {
+        max_ads: 20,
+        priority: 'premium',
+        analytics: true,
+        custom_targeting: true,
+        dedicated_support: true
+      }
+    },
+    {
+      id: 'pkg-4',
+      name: 'Annual Ultimate',
+      description: 'Ultimate package for 12 months with maximum exposure',
+      duration_months: 12,
+      price_euros: 15000, // €150.00
+      sort_order: 4,
+      is_active: true,
+      features: {
+        max_ads: 'unlimited',
+        priority: 'premium',
+        analytics: true,
+        custom_targeting: true,
+        dedicated_support: true,
+        featured_placement: true
+      }
+    }
+  ],
+  advertisements: [
+    {
+      id: 'ad-1',
+      title: 'Advanced Heart Monitoring System',
+      content: 'Revolutionary cardiac monitoring technology for better patient outcomes. FDA approved and hospital tested.',
+      image_url: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=200&fit=crop',
+      click_url: 'https://example.com/heart-monitor',
+      sponsor_id: 'sponsor-1',
+      package_id: 'pkg-2',
+      status: 'active',
+      start_date: new Date(Date.now() - 86400000).toISOString(),
+      end_date: new Date(Date.now() + 7776000000).toISOString(), // 3 months
+      total_impressions: 1250,
+      total_clicks: 89,
+      created_at: new Date(Date.now() - 86400000).toISOString(),
+      sponsor: {
+        id: 'sponsor-1',
+        full_name: 'MedTech Solutions'
+      }
+    },
+    {
+      id: 'ad-2',
+      title: 'Digital Health Platform',
+      content: 'Streamline your practice with our comprehensive digital health management platform.',
+      image_url: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=200&fit=crop',
+      click_url: 'https://example.com/health-platform',
+      sponsor_id: 'sponsor-1',
+      package_id: 'pkg-1',
+      status: 'pending',
+      created_at: new Date().toISOString(),
+      sponsor: {
+        id: 'sponsor-1',
+        full_name: 'MedTech Solutions'
+      }
+    }
+  ],
+  payments: [
+    {
+      id: 'pay-1',
+      user_id: 'sponsor-1',
+      package_id: 'pkg-2',
+      amount_euros: 5000,
+      currency: 'EUR',
+      status: 'succeeded',
+      stripe_payment_intent_id: 'pi_demo_123456',
+      description: 'Payment for Quarterly Pro package',
+      created_at: new Date(Date.now() - 86400000).toISOString(),
+      package: {
+        name: 'Quarterly Pro',
+        duration_months: 3
+      }
+    }
+  ]
+}
+
 export const DataProvider = ({ children }) => {
   const { profile, isAdmin, isSponsor } = useAuth()
   
   // Core data states
-  const [users, setUsers] = useState([])
-  const [patients, setPatients] = useState([])
-  const [documents, setDocuments] = useState([])
-  const [tasks, setTasks] = useState([])
-  const [appointments, setAppointments] = useState([])
-  const [advertisements, setAdvertisements] = useState([])
-  const [adPackages, setAdPackages] = useState([])
-  const [payments, setPayments] = useState([])
-  const [adminStats, setAdminStats] = useState({})
+  const [users, setUsers] = useState(DEMO_DATA.users)
+  const [patients, setPatients] = useState(DEMO_DATA.users.filter(u => u.role === 'patient'))
+  const [documents, setDocuments] = useState(DEMO_DATA.documents)
+  const [tasks, setTasks] = useState(DEMO_DATA.tasks)
+  const [appointments, setAppointments] = useState(DEMO_DATA.appointments)
+  const [advertisements, setAdvertisements] = useState(DEMO_DATA.advertisements)
+  const [adPackages, setAdPackages] = useState(DEMO_DATA.adPackages)
+  const [payments, setPayments] = useState(DEMO_DATA.payments)
+  const [adminStats, setAdminStats] = useState({
+    totalUsers: DEMO_DATA.users.length,
+    activeAds: DEMO_DATA.advertisements.filter(ad => ad.status === 'active').length,
+    totalRevenue: 5000,
+    pendingTasks: DEMO_DATA.tasks.filter(t => t.status === 'pending').length
+  })
   
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    if (profile) {
-      loadData()
-    }
-  }, [profile])
-
-  const loadData = async () => {
-    try {
-      setLoading(true)
-      
-      if (isAdmin) {
-        await loadAdminData()
-      } else if (isSponsor) {
-        await loadSponsorData()
-      } else {
-        await loadUserData()
-      }
-      
-      // Load ad packages for all users
-      await loadAdPackages()
-      
-      // Load active advertisements for display
-      if (!isSponsor && !isAdmin) {
-        await loadActiveAdvertisements()
-      }
-    } catch (error) {
-      console.error('Error loading data:', error)
-      toast.error('Error loading data')
-    } finally {
-      setLoading(false)
-    }
+  // Helper functions to get user-specific data
+  const getUserTasks = () => {
+    if (!profile) return []
+    return tasks.filter(task => task.assigned_to === profile.id)
   }
 
-  const loadAdminData = async () => {
-    try {
-      const [allUsers, allAds, stats] = await Promise.all([
-        dbHelpers.getAllUsers(),
-        dbHelpers.getAllAdvertisements(),
-        dbHelpers.getAdminStats()
-      ])
-
-      setUsers(allUsers)
-      setAdvertisements(allAds)
-      setAdminStats(stats)
-      setPatients(allUsers.filter(u => u.role === 'patient'))
-    } catch (error) {
-      console.error('Error loading admin data:', error)
-    }
+  const getPatientTasks = (patientId) => {
+    return tasks.filter(task => task.patient_id === patientId)
   }
 
-  const loadSponsorData = async () => {
-    try {
-      const [sponsorAds, userPayments] = await Promise.all([
-        dbHelpers.getSponsorAdvertisements(profile.id),
-        dbHelpers.getUserPayments(profile.id)
-      ])
-
-      setAdvertisements(sponsorAds)
-      setPayments(userPayments)
-    } catch (error) {
-      console.error('Error loading sponsor data:', error)
-    }
+  const getPatientDocuments = (patientId) => {
+    return documents.filter(doc => doc.patient_id === patientId)
   }
 
-  const loadUserData = async () => {
-    try {
-      const loadPromises = []
-
-      if (profile.role === 'patient') {
-        loadPromises.push(
-          dbHelpers.getPatientDocuments(profile.id).then(setDocuments),
-          dbHelpers.getPatientTasks(profile.id).then(setTasks),
-          dbHelpers.getUserAppointments(profile.id, 'patient').then(setAppointments)
-        )
-      } else if (profile.role === 'doctor' || profile.role === 'nurse') {
-        loadPromises.push(
-          dbHelpers.getProviderPatients(profile.id).then(setPatients),
-          dbHelpers.getUserTasks(profile.id).then(setTasks),
-          dbHelpers.getUserAppointments(profile.id, profile.role).then(setAppointments)
-        )
-      }
-
-      await Promise.all(loadPromises)
-    } catch (error) {
-      console.error('Error loading user data:', error)
-    }
-  }
-
-  const loadAdPackages = async () => {
-    try {
-      const packages = await dbHelpers.getAdPackages()
-      setAdPackages(packages)
-    } catch (error) {
-      console.error('Error loading ad packages:', error)
-    }
-  }
-
-  const loadActiveAdvertisements = async () => {
-    try {
-      const activeAds = await dbHelpers.getActiveAdvertisements()
-      setAdvertisements(activeAds)
-    } catch (error) {
-      console.error('Error loading active advertisements:', error)
+  const getUserAppointments = (userId, role) => {
+    if (role === 'patient') {
+      return appointments.filter(apt => apt.patient_id === userId)
+    } else {
+      return appointments.filter(apt => apt.provider_id === userId)
     }
   }
 
   // User Management Functions
   const createUser = async (userData) => {
     try {
-      const newUser = await dbHelpers.createUserProfile(userData)
+      const newUser = {
+        id: `user-${Date.now()}`,
+        ...userData,
+        created_at: new Date().toISOString(),
+        is_active: true
+      }
       setUsers(prev => [newUser, ...prev])
       if (newUser.role === 'patient') {
         setPatients(prev => [newUser, ...prev])
@@ -154,13 +315,16 @@ export const DataProvider = ({ children }) => {
 
   const updateUser = async (userId, updates) => {
     try {
-      const updatedUser = await dbHelpers.updateUserProfile(userId, updates)
-      setUsers(prev => prev.map(user => user.id === userId ? updatedUser : user))
-      if (updatedUser.role === 'patient') {
-        setPatients(prev => prev.map(patient => patient.id === userId ? updatedUser : patient))
+      setUsers(prev => prev.map(user => 
+        user.id === userId ? { ...user, ...updates } : user
+      ))
+      if (updates.role === 'patient') {
+        setPatients(prev => prev.map(patient => 
+          patient.id === userId ? { ...patient, ...updates } : patient
+        ))
       }
       toast.success('User updated successfully!')
-      return { success: true, user: updatedUser }
+      return { success: true }
     } catch (error) {
       console.error('Error updating user:', error)
       toast.error('Error updating user')
@@ -170,7 +334,6 @@ export const DataProvider = ({ children }) => {
 
   const deleteUser = async (userId) => {
     try {
-      await dbHelpers.deleteUserProfile(userId)
       setUsers(prev => prev.filter(user => user.id !== userId))
       setPatients(prev => prev.filter(patient => patient.id !== userId))
       toast.success('User deleted successfully!')
@@ -183,58 +346,47 @@ export const DataProvider = ({ children }) => {
   }
 
   // Document Management
-  const createDocument = async (documentData) => {
-    try {
-      const newDoc = await dbHelpers.createDocument({
-        ...documentData,
-        uploaded_by: profile.id
-      })
-      setDocuments(prev => [newDoc, ...prev])
-      toast.success('Document uploaded successfully!')
-      return { success: true, document: newDoc }
-    } catch (error) {
-      console.error('Error creating document:', error)
-      toast.error('Error uploading document')
-      return { success: false, error: error.message }
+  const addDocument = ({ title, description, type, patientId }) => {
+    const newDoc = {
+      id: `doc-${Date.now()}`,
+      title,
+      description,
+      type,
+      patient_id: patientId || profile?.id,
+      uploaded_by: profile?.id,
+      url: '#',
+      uploadedAt: new Date().toISOString(),
+      created_at: new Date().toISOString()
     }
-  }
-
-  const deleteDocument = async (documentId) => {
-    try {
-      await dbHelpers.deleteDocument(documentId)
-      setDocuments(prev => prev.filter(doc => doc.id !== documentId))
-      toast.success('Document deleted successfully!')
-      return { success: true }
-    } catch (error) {
-      console.error('Error deleting document:', error)
-      toast.error('Error deleting document')
-      return { success: false, error: error.message }
-    }
+    setDocuments(prev => [newDoc, ...prev])
+    toast.success('Document uploaded successfully!')
   }
 
   // Task Management
-  const createTask = async (taskData) => {
-    try {
-      const newTask = await dbHelpers.createTask({
-        ...taskData,
-        assigned_by: profile.id
-      })
-      setTasks(prev => [newTask, ...prev])
-      toast.success('Task created successfully!')
-      return { success: true, task: newTask }
-    } catch (error) {
-      console.error('Error creating task:', error)
-      toast.error('Error creating task')
-      return { success: false, error: error.message }
+  const addTask = ({ title, description, patientId, assignedTo, dueDate, priority }) => {
+    const newTask = {
+      id: `task-${Date.now()}`,
+      title,
+      description,
+      patient_id: patientId,
+      assigned_to: assignedTo || profile?.id,
+      assigned_by: profile?.id,
+      status: 'pending',
+      priority: priority || 'medium',
+      due_date: dueDate,
+      created_at: new Date().toISOString()
     }
+    setTasks(prev => [newTask, ...prev])
+    toast.success('Task created successfully!')
   }
 
   const updateTask = async (taskId, updates) => {
     try {
-      const updatedTask = await dbHelpers.updateTask(taskId, updates)
-      setTasks(prev => prev.map(task => task.id === taskId ? updatedTask : task))
+      setTasks(prev => prev.map(task => 
+        task.id === taskId ? { ...task, ...updates } : task
+      ))
       toast.success('Task updated successfully!')
-      return { success: true, task: updatedTask }
+      return { success: true }
     } catch (error) {
       console.error('Error updating task:', error)
       toast.error('Error updating task')
@@ -242,70 +394,42 @@ export const DataProvider = ({ children }) => {
     }
   }
 
-  const deleteTask = async (taskId) => {
-    try {
-      await dbHelpers.deleteTask(taskId)
-      setTasks(prev => prev.filter(task => task.id !== taskId))
-      toast.success('Task deleted successfully!')
-      return { success: true }
-    } catch (error) {
-      console.error('Error deleting task:', error)
-      toast.error('Error deleting task')
-      return { success: false, error: error.message }
-    }
-  }
-
   // Appointment Management
-  const createAppointment = async (appointmentData) => {
-    try {
-      const newAppointment = await dbHelpers.createAppointment({
-        ...appointmentData,
-        created_by: profile.id
-      })
-      setAppointments(prev => [newAppointment, ...prev])
-      toast.success('Appointment created successfully!')
-      return { success: true, appointment: newAppointment }
-    } catch (error) {
-      console.error('Error creating appointment:', error)
-      toast.error('Error creating appointment')
-      return { success: false, error: error.message }
+  const addAppointment = ({ title, patientId, date, time, duration, type, location, notes }) => {
+    const appointmentDateTime = new Date(`${date}T${time}`)
+    const newAppointment = {
+      id: `apt-${Date.now()}`,
+      title,
+      patient_id: patientId,
+      provider_id: profile?.role === 'doctor' ? profile.id : 'doctor-1',
+      appointment_date: appointmentDateTime.toISOString(),
+      duration: duration || 30,
+      type: type || 'consultation',
+      location,
+      notes,
+      status: 'scheduled',
+      created_at: new Date().toISOString()
     }
-  }
-
-  const updateAppointment = async (appointmentId, updates) => {
-    try {
-      const updatedAppointment = await dbHelpers.updateAppointment(appointmentId, updates)
-      setAppointments(prev => prev.map(apt => apt.id === appointmentId ? updatedAppointment : apt))
-      toast.success('Appointment updated successfully!')
-      return { success: true, appointment: updatedAppointment }
-    } catch (error) {
-      console.error('Error updating appointment:', error)
-      toast.error('Error updating appointment')
-      return { success: false, error: error.message }
-    }
-  }
-
-  const deleteAppointment = async (appointmentId) => {
-    try {
-      await dbHelpers.deleteAppointment(appointmentId)
-      setAppointments(prev => prev.filter(apt => apt.id !== appointmentId))
-      toast.success('Appointment deleted successfully!')
-      return { success: true }
-    } catch (error) {
-      console.error('Error deleting appointment:', error)
-      toast.error('Error deleting appointment')
-      return { success: false, error: error.message }
-    }
+    setAppointments(prev => [newAppointment, ...prev])
+    toast.success('Appointment created successfully!')
   }
 
   // Advertisement Management
   const createAdvertisement = async (adData) => {
     try {
-      const newAd = await dbHelpers.createAdvertisement({
+      const newAd = {
+        id: `ad-${Date.now()}`,
         ...adData,
-        sponsor_id: profile.id,
-        status: 'pending'
-      })
+        sponsor_id: profile?.id,
+        status: 'pending',
+        total_impressions: 0,
+        total_clicks: 0,
+        created_at: new Date().toISOString(),
+        sponsor: {
+          id: profile?.id,
+          full_name: profile?.full_name
+        }
+      }
       setAdvertisements(prev => [newAd, ...prev])
       toast.success('Advertisement created successfully!')
       return { success: true, advertisement: newAd }
@@ -318,12 +442,13 @@ export const DataProvider = ({ children }) => {
 
   const updateAdvertisement = async (adId, updates) => {
     try {
-      const updatedAd = await dbHelpers.updateAdvertisement(adId, updates)
-      setAdvertisements(prev => prev.map(ad => ad.id === adId ? updatedAd : ad))
+      setAdvertisements(prev => prev.map(ad => 
+        ad.id === adId ? { ...ad, ...updates } : ad
+      ))
       if (updates.status) {
         toast.success(`Advertisement ${updates.status} successfully!`)
       }
-      return { success: true, advertisement: updatedAd }
+      return { success: true }
     } catch (error) {
       console.error('Error updating advertisement:', error)
       toast.error('Error updating advertisement')
@@ -333,7 +458,6 @@ export const DataProvider = ({ children }) => {
 
   const deleteAdvertisement = async (adId) => {
     try {
-      await dbHelpers.deleteAdvertisement(adId)
       setAdvertisements(prev => prev.filter(ad => ad.id !== adId))
       toast.success('Advertisement deleted successfully!')
       return { success: true }
@@ -344,10 +468,14 @@ export const DataProvider = ({ children }) => {
     }
   }
 
-  // Package Management (Admin only)
+  // Package Management
   const createAdPackage = async (packageData) => {
     try {
-      const newPackage = await dbHelpers.createAdPackage(packageData)
+      const newPackage = {
+        id: `pkg-${Date.now()}`,
+        ...packageData,
+        created_at: new Date().toISOString()
+      }
       setAdPackages(prev => [...prev, newPackage])
       toast.success('Package created successfully!')
       return { success: true, package: newPackage }
@@ -360,10 +488,11 @@ export const DataProvider = ({ children }) => {
 
   const updateAdPackage = async (packageId, updates) => {
     try {
-      const updatedPackage = await dbHelpers.updateAdPackage(packageId, updates)
-      setAdPackages(prev => prev.map(pkg => pkg.id === packageId ? updatedPackage : pkg))
+      setAdPackages(prev => prev.map(pkg => 
+        pkg.id === packageId ? { ...pkg, ...updates } : pkg
+      ))
       toast.success('Package updated successfully!')
-      return { success: true, package: updatedPackage }
+      return { success: true }
     } catch (error) {
       console.error('Error updating package:', error)
       toast.error('Error updating package')
@@ -374,11 +503,14 @@ export const DataProvider = ({ children }) => {
   // Payment Management
   const createPayment = async (paymentData) => {
     try {
-      const newPayment = await dbHelpers.createPayment({
+      const newPayment = {
+        id: `pay-${Date.now()}`,
         ...paymentData,
-        user_id: profile.id
-      })
+        user_id: profile?.id,
+        created_at: new Date().toISOString()
+      }
       setPayments(prev => [newPayment, ...prev])
+      toast.success('Payment processed successfully!')
       return { success: true, payment: newPayment }
     } catch (error) {
       console.error('Error creating payment:', error)
@@ -387,32 +519,21 @@ export const DataProvider = ({ children }) => {
     }
   }
 
-  const updatePayment = async (paymentId, updates) => {
-    try {
-      const updatedPayment = await dbHelpers.updatePayment(paymentId, updates)
-      setPayments(prev => prev.map(payment => payment.id === paymentId ? updatedPayment : payment))
-      return { success: true, payment: updatedPayment }
-    } catch (error) {
-      console.error('Error updating payment:', error)
-      return { success: false, error: error.message }
-    }
-  }
-
   // Analytics
   const trackAdImpression = async (adId) => {
-    try {
-      await dbHelpers.trackAdImpression(adId, profile?.id)
-    } catch (error) {
-      console.error('Error tracking impression:', error)
-    }
+    setAdvertisements(prev => prev.map(ad => 
+      ad.id === adId 
+        ? { ...ad, total_impressions: (ad.total_impressions || 0) + 1 }
+        : ad
+    ))
   }
 
   const trackAdClick = async (adId) => {
-    try {
-      await dbHelpers.trackAdClick(adId, profile?.id)
-    } catch (error) {
-      console.error('Error tracking click:', error)
-    }
+    setAdvertisements(prev => prev.map(ad => 
+      ad.id === adId 
+        ? { ...ad, total_clicks: (ad.total_clicks || 0) + 1 }
+        : ad
+    ))
   }
 
   const value = {
@@ -428,24 +549,26 @@ export const DataProvider = ({ children }) => {
     adminStats,
     loading,
     
+    // Helper functions
+    getUserTasks,
+    getPatientTasks,
+    getPatientDocuments,
+    getUserAppointments,
+    
     // User Management
     createUser,
     updateUser,
     deleteUser,
     
     // Document Management
-    createDocument,
-    deleteDocument,
+    addDocument,
     
     // Task Management
-    createTask,
+    addTask,
     updateTask,
-    deleteTask,
     
     // Appointment Management
-    createAppointment,
-    updateAppointment,
-    deleteAppointment,
+    addAppointment,
     
     // Advertisement Management
     createAdvertisement,
@@ -458,14 +581,10 @@ export const DataProvider = ({ children }) => {
     
     // Payment Management
     createPayment,
-    updatePayment,
     
     // Analytics
     trackAdImpression,
-    trackAdClick,
-    
-    // Refresh
-    refreshData: loadData
+    trackAdClick
   }
 
   return (

@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAuth } from '../../contexts/AuthContext'
 import { useData } from '../../contexts/DataContext'
-import { dbHelpers } from '../../lib/supabase'
 import SafeIcon from '../../common/SafeIcon'
 import * as FiIcons from 'react-icons/fi'
 
 const { FiX, FiExternalLink } = FiIcons
 
 const AdvertisementBanner = () => {
-  const { advertisements } = useData()
+  const { profile } = useAuth()
+  const { advertisements, trackAdImpression, trackAdClick } = useData()
   const [currentAdIndex, setCurrentAdIndex] = useState(0)
   const [isVisible, setIsVisible] = useState(true)
 
+  // Only show active ads to non-admin/non-sponsor users
   const activeAds = advertisements.filter(ad => 
     ad.status === 'active' && 
     new Date(ad.end_date) > new Date()
@@ -27,41 +29,29 @@ const AdvertisementBanner = () => {
     }
   }, [activeAds.length])
 
+  useEffect(() => {
+    // Track impression when ad changes
+    if (activeAds[currentAdIndex]) {
+      trackAdImpression(activeAds[currentAdIndex].id)
+    }
+  }, [currentAdIndex, activeAds, trackAdImpression])
+
   const handleAdClick = async (ad) => {
     try {
       // Track click
-      await dbHelpers.updateAdvertisement(ad.id, {
-        clicks: (ad.clicks || 0) + 1
-      })
+      await trackAdClick(ad.id)
 
       // Open link if provided
-      if (ad.link_url) {
-        window.open(ad.link_url, '_blank', 'noopener,noreferrer')
+      if (ad.click_url) {
+        window.open(ad.click_url, '_blank', 'noopener,noreferrer')
       }
     } catch (error) {
       console.error('Error tracking ad click:', error)
     }
   }
 
-  const handleAdImpression = async (ad) => {
-    try {
-      // Track impression
-      await dbHelpers.updateAdvertisement(ad.id, {
-        impressions: (ad.impressions || 0) + 1
-      })
-    } catch (error) {
-      console.error('Error tracking ad impression:', error)
-    }
-  }
-
-  useEffect(() => {
-    // Track impression when ad changes
-    if (activeAds[currentAdIndex]) {
-      handleAdImpression(activeAds[currentAdIndex])
-    }
-  }, [currentAdIndex, activeAds])
-
-  if (!isVisible || activeAds.length === 0) {
+  // Don't show banner to admin or sponsor users, or if no ads or banner is hidden
+  if (!isVisible || activeAds.length === 0 || profile?.role === 'admin' || profile?.role === 'sponsor') {
     return null
   }
 
@@ -100,7 +90,7 @@ const AdvertisementBanner = () => {
                   </p>
                 </div>
                 
-                {currentAd.link_url && (
+                {currentAd.click_url && (
                   <SafeIcon icon={FiExternalLink} className="w-4 h-4 text-gray-400" />
                 )}
               </div>
@@ -126,7 +116,6 @@ const AdvertisementBanner = () => {
               <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
                 Sponsored
               </span>
-              
               <button
                 onClick={() => setIsVisible(false)}
                 className="p-1 text-gray-400 hover:text-gray-600 transition-colors"

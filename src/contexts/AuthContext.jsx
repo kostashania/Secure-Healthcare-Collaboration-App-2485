@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
-import { supabase, dbHelpers } from '../lib/supabase'
 import { toast } from 'react-toastify'
 
 const AuthContext = createContext({})
@@ -12,87 +11,162 @@ export const useAuth = () => {
   return context
 }
 
+// Demo users with proper credentials
+const DEMO_USERS = [
+  {
+    id: 'admin-1',
+    email: 'admin@demo.com',
+    password: 'demo123',
+    profile: {
+      id: 'admin-1',
+      auth_user_id: 'admin-1',
+      email: 'admin@demo.com',
+      full_name: 'Admin User',
+      role: 'admin',
+      phone_number: '+1234567890',
+      is_active: true,
+      created_at: new Date().toISOString(),
+      profilePicture: 'https://ui-avatars.com/api/?name=Admin+User&background=ef4444&color=fff'
+    }
+  },
+  {
+    id: 'doctor-1',
+    email: 'doctor@demo.com',
+    password: 'demo123',
+    profile: {
+      id: 'doctor-1',
+      auth_user_id: 'doctor-1',
+      email: 'doctor@demo.com',
+      full_name: 'Dr. Sarah Johnson',
+      role: 'doctor',
+      specialization: 'Cardiology',
+      license_number: 'MD123456',
+      phone_number: '+1234567891',
+      is_active: true,
+      created_at: new Date().toISOString(),
+      profilePicture: 'https://ui-avatars.com/api/?name=Dr+Sarah+Johnson&background=22c55e&color=fff'
+    }
+  },
+  {
+    id: 'nurse-1',
+    email: 'nurse@demo.com',
+    password: 'demo123',
+    profile: {
+      id: 'nurse-1',
+      auth_user_id: 'nurse-1',
+      email: 'nurse@demo.com',
+      full_name: 'Maria Rodriguez',
+      role: 'nurse',
+      specialization: 'Emergency Care',
+      license_number: 'RN789012',
+      phone_number: '+1234567892',
+      is_active: true,
+      created_at: new Date().toISOString(),
+      profilePicture: 'https://ui-avatars.com/api/?name=Maria+Rodriguez&background=8b5cf6&color=fff'
+    }
+  },
+  {
+    id: 'patient-1',
+    email: 'patient@demo.com',
+    password: 'demo123',
+    profile: {
+      id: 'patient-1',
+      auth_user_id: 'patient-1',
+      email: 'patient@demo.com',
+      full_name: 'John Smith',
+      role: 'patient',
+      date_of_birth: '1985-03-15',
+      phone_number: '+1234567893',
+      is_active: true,
+      created_at: new Date().toISOString(),
+      profilePicture: 'https://ui-avatars.com/api/?name=John+Smith&background=3b82f6&color=fff'
+    }
+  },
+  {
+    id: 'sponsor-1',
+    email: 'sponsor@demo.com',
+    password: 'demo123',
+    profile: {
+      id: 'sponsor-1',
+      auth_user_id: 'sponsor-1',
+      email: 'sponsor@demo.com',
+      full_name: 'MedTech Solutions',
+      role: 'sponsor',
+      phone_number: '+1234567894',
+      bio: 'Leading healthcare technology provider',
+      is_active: true,
+      created_at: new Date().toISOString(),
+      profilePicture: 'https://ui-avatars.com/api/?name=MedTech+Solutions&background=eab308&color=fff'
+    }
+  }
+]
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        handleUserSession(session.user)
-      } else {
-        setLoading(false)
+    // Check for existing session
+    const savedUser = localStorage.getItem('healthcare_auth_user')
+    const savedProfile = localStorage.getItem('healthcare_auth_profile')
+    
+    if (savedUser && savedProfile) {
+      try {
+        setUser(JSON.parse(savedUser))
+        setProfile(JSON.parse(savedProfile))
+      } catch (error) {
+        console.error('Error parsing saved auth data:', error)
+        localStorage.removeItem('healthcare_auth_user')
+        localStorage.removeItem('healthcare_auth_profile')
       }
-    })
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        await handleUserSession(session.user)
-      } else {
-        setUser(null)
-        setProfile(null)
-        setLoading(false)
-      }
-    })
-
-    return () => subscription.unsubscribe()
-  }, [])
-
-  const handleUserSession = async (authUser) => {
-    try {
-      setUser(authUser)
-      
-      // Get user profile
-      const userProfile = await dbHelpers.getUserProfile(authUser.id)
-      setProfile(userProfile)
-      
-      if (!userProfile) {
-        console.warn('User profile not found for:', authUser.email)
-      }
-    } catch (error) {
-      console.error('Error handling user session:', error)
-      toast.error('Error loading user profile')
-    } finally {
-      setLoading(false)
     }
-  }
+    
+    setLoading(false)
+  }, [])
 
   const signUp = async (formData) => {
     try {
       setLoading(true)
       
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-      })
-
-      if (authError) throw authError
-
-      if (authData.user) {
-        // Create user profile
-        const profileData = {
-          auth_user_id: authData.user.id,
-          email: formData.email,
-          full_name: formData.fullName,
-          role: formData.role,
-          phone_number: formData.phoneNumber || null,
-          date_of_birth: formData.dateOfBirth || null,
-          specialization: formData.specialization || null,
-          license_number: formData.licenseNumber || null,
-          bio: formData.bio || null
-        }
-
-        const userProfile = await dbHelpers.createUserProfile(profileData)
-        setProfile(userProfile)
-
-        toast.success('Account created successfully!')
-        return { success: true, user: authData.user, profile: userProfile }
+      // Check if email already exists
+      const existingUser = DEMO_USERS.find(u => u.email === formData.email)
+      if (existingUser) {
+        throw new Error('User with this email already exists')
       }
 
-      return { success: false, error: 'User creation failed' }
+      // Create new user
+      const newUserId = `${formData.role}-${Date.now()}`
+      const newUser = {
+        id: newUserId,
+        email: formData.email
+      }
+
+      const newProfile = {
+        id: newUserId,
+        auth_user_id: newUserId,
+        email: formData.email,
+        full_name: formData.fullName,
+        role: formData.role,
+        phone_number: formData.phoneNumber || null,
+        date_of_birth: formData.dateOfBirth || null,
+        specialization: formData.specialization || null,
+        license_number: formData.licenseNumber || null,
+        bio: formData.bio || null,
+        is_active: true,
+        created_at: new Date().toISOString(),
+        profilePicture: `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.fullName)}&background=random&color=fff`
+      }
+
+      // Save to localStorage
+      localStorage.setItem('healthcare_auth_user', JSON.stringify(newUser))
+      localStorage.setItem('healthcare_auth_profile', JSON.stringify(newProfile))
+
+      setUser(newUser)
+      setProfile(newProfile)
+
+      toast.success('Account created successfully!')
+      return { success: true, user: newUser, profile: newProfile }
     } catch (error) {
       console.error('Sign up error:', error)
       toast.error(error.message)
@@ -106,15 +180,22 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true)
       
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
+      // Find demo user
+      const demoUser = DEMO_USERS.find(u => u.email === email && u.password === password)
+      
+      if (!demoUser) {
+        throw new Error('Invalid email or password')
+      }
 
-      if (error) throw error
+      // Save to localStorage
+      localStorage.setItem('healthcare_auth_user', JSON.stringify({ id: demoUser.id, email: demoUser.email }))
+      localStorage.setItem('healthcare_auth_profile', JSON.stringify(demoUser.profile))
+
+      setUser({ id: demoUser.id, email: demoUser.email })
+      setProfile(demoUser.profile)
 
       toast.success('Signed in successfully!')
-      return { success: true, user: data.user }
+      return { success: true, user: { id: demoUser.id, email: demoUser.email } }
     } catch (error) {
       console.error('Sign in error:', error)
       toast.error(error.message)
@@ -126,8 +207,8 @@ export const AuthProvider = ({ children }) => {
 
   const signOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut()
-      if (error) throw error
+      localStorage.removeItem('healthcare_auth_user')
+      localStorage.removeItem('healthcare_auth_profile')
       
       setUser(null)
       setProfile(null)
@@ -142,7 +223,8 @@ export const AuthProvider = ({ children }) => {
     try {
       if (!profile) throw new Error('No profile found')
       
-      const updatedProfile = await dbHelpers.updateUserProfile(profile.id, updates)
+      const updatedProfile = { ...profile, ...updates }
+      localStorage.setItem('healthcare_auth_profile', JSON.stringify(updatedProfile))
       setProfile(updatedProfile)
       
       toast.success('Profile updated successfully!')
@@ -160,7 +242,7 @@ export const AuthProvider = ({ children }) => {
         throw new Error('Unauthorized')
       }
 
-      await dbHelpers.deleteUserProfile(userId)
+      // In demo mode, just show success message
       toast.success('User deleted successfully!')
       return { success: true }
     } catch (error) {

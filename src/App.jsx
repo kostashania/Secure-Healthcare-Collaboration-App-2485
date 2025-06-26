@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { DataProvider } from './contexts/DataContext'
 import AuthForm from './components/Auth/AuthForm'
@@ -54,7 +56,6 @@ const AppContent = () => {
     if (profile.role === 'admin') {
       switch (activeTab) {
         case 'admin':
-          return <AdminDashboard />
         case 'users':
         case 'advertisements':
         case 'analytics':
@@ -89,9 +90,17 @@ const AppContent = () => {
       case 'appointments':
         return <AppointmentCalendar />
       case 'patients':
-        return <div className="text-center py-12"><p className="text-gray-500">Patients management coming soon...</p></div>
+        return (
+          <div className="text-center py-12">
+            <p className="text-gray-500">Patients management coming soon...</p>
+          </div>
+        )
       case 'team':
-        return <div className="text-center py-12"><p className="text-gray-500">Team management coming soon...</p></div>
+        return (
+          <div className="text-center py-12">
+            <p className="text-gray-500">Team management coming soon...</p>
+          </div>
+        )
       default:
         return <Dashboard />
     }
@@ -125,6 +134,19 @@ const AppContent = () => {
           <AdvertisementBanner />
         )}
       </div>
+
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </DataProvider>
   )
 }
