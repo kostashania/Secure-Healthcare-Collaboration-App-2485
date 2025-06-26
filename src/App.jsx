@@ -12,6 +12,7 @@ import Dashboard from './components/Dashboard/Dashboard'
 import DocumentManager from './components/Documents/DocumentManager'
 import TaskManager from './components/Tasks/TaskManager'
 import AppointmentCalendar from './components/Calendar/AppointmentCalendar'
+import TeamManager from './components/Team/TeamManager'
 import AdminDashboard from './components/Admin/AdminDashboard'
 import SponsorDashboard from './components/Sponsor/SponsorDashboard'
 import './App.css'
@@ -32,7 +33,7 @@ const AppContent = () => {
     } else if (profile?.role === 'sponsor' && activeTab === 'dashboard') {
       setActiveTab('sponsor')
     }
-  }, [profile?.role])
+  }, [profile?.role, activeTab])
 
   if (loading) {
     return (
@@ -89,16 +90,12 @@ const AppContent = () => {
         return <TaskManager />
       case 'appointments':
         return <AppointmentCalendar />
+      case 'team':
+        return <TeamManager />
       case 'patients':
         return (
           <div className="text-center py-12">
-            <p className="text-gray-500">Patients management coming soon...</p>
-          </div>
-        )
-      case 'team':
-        return (
-          <div className="text-center py-12">
-            <p className="text-gray-500">Team management coming soon...</p>
+            <p className="text-gray-500">Patient management coming soon...</p>
           </div>
         )
       default:

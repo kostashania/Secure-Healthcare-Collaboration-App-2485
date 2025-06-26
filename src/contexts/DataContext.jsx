@@ -12,8 +12,8 @@ export const useData = () => {
   return context
 }
 
-// Demo data
-const DEMO_DATA = {
+// Demo data with proper structure
+const INITIAL_DEMO_DATA = {
   users: [
     {
       id: 'admin-1',
@@ -50,6 +50,14 @@ const DEMO_DATA = {
       created_at: new Date().toISOString()
     },
     {
+      id: 'patient-2',
+      full_name: 'Emma Wilson',
+      email: 'emma@demo.com',
+      role: 'patient',
+      is_active: true,
+      created_at: new Date().toISOString()
+    },
+    {
       id: 'sponsor-1',
       full_name: 'MedTech Solutions',
       email: 'sponsor@demo.com',
@@ -64,68 +72,87 @@ const DEMO_DATA = {
       title: 'Blood Test Results',
       description: 'Complete blood count and chemistry panel',
       type: 'lab_result',
-      patient_id: 'patient-1',
-      uploaded_by: 'doctor-1',
-      url: '#',
+      patientId: 'patient-1',
+      uploadedBy: 'doctor-1',
+      url: 'https://example.com/bloodtest.pdf',
+      uploadedAt: new Date(Date.now() - 86400000).toISOString(),
       created_at: new Date(Date.now() - 86400000).toISOString()
     },
     {
       id: 'doc-2',
-      title: 'Prescription - Medication',
-      description: 'Blood pressure medication prescription',
+      title: 'Prescription - Blood Pressure Medication',
+      description: 'Lisinopril 10mg daily prescription',
       type: 'prescription',
-      patient_id: 'patient-1',
-      uploaded_by: 'doctor-1',
-      url: '#',
+      patientId: 'patient-1',
+      uploadedBy: 'doctor-1',
+      url: 'https://example.com/prescription.pdf',
+      uploadedAt: new Date(Date.now() - 172800000).toISOString(),
       created_at: new Date(Date.now() - 172800000).toISOString()
     }
   ],
   tasks: [
     {
       id: 'task-1',
-      title: 'Take Blood Pressure',
-      description: 'Monitor patient blood pressure twice daily',
-      patient_id: 'patient-1',
-      assigned_to: 'nurse-1',
-      assigned_by: 'doctor-1',
+      title: 'Take Blood Pressure Reading',
+      description: 'Monitor patient blood pressure twice daily for the next week',
+      patientId: 'patient-1',
+      assignedTo: 'nurse-1',
+      assignedBy: 'doctor-1',
       status: 'pending',
       priority: 'high',
-      due_date: new Date(Date.now() + 86400000).toISOString(),
+      dueDate: new Date(Date.now() + 86400000).toISOString(),
       created_at: new Date().toISOString()
     },
     {
       id: 'task-2',
-      title: 'Follow-up Call',
-      description: 'Check on patient recovery progress',
-      patient_id: 'patient-1',
-      assigned_to: 'nurse-1',
-      assigned_by: 'doctor-1',
+      title: 'Follow-up Phone Call',
+      description: 'Check on patient recovery progress after surgery',
+      patientId: 'patient-1',
+      assignedTo: 'nurse-1',
+      assignedBy: 'doctor-1',
       status: 'completed',
       priority: 'medium',
+      dueDate: new Date(Date.now() - 86400000).toISOString(),
       created_at: new Date(Date.now() - 86400000).toISOString()
+    },
+    {
+      id: 'task-3',
+      title: 'Schedule Follow-up Appointment',
+      description: 'Book 2-week follow-up for Emma Wilson',
+      patientId: 'patient-2',
+      assignedTo: 'patient-2',
+      assignedBy: 'doctor-1',
+      status: 'pending',
+      priority: 'medium',
+      dueDate: new Date(Date.now() + 172800000).toISOString(),
+      created_at: new Date().toISOString()
     }
   ],
   appointments: [
     {
       id: 'apt-1',
       title: 'Cardiology Consultation',
-      patient_id: 'patient-1',
-      provider_id: 'doctor-1',
-      appointment_date: new Date(Date.now() + 172800000).toISOString(),
+      patientId: 'patient-1',
+      providerId: 'doctor-1',
+      date: new Date(Date.now() + 172800000).toISOString(),
       duration: 30,
       type: 'consultation',
       status: 'scheduled',
+      location: 'Room 205',
+      notes: 'Follow-up for blood pressure medication',
       created_at: new Date().toISOString()
     },
     {
       id: 'apt-2',
-      title: 'Follow-up Visit',
-      patient_id: 'patient-1',
-      provider_id: 'doctor-1',
-      appointment_date: new Date(Date.now() + 604800000).toISOString(),
+      title: 'Routine Check-up',
+      patientId: 'patient-2',
+      providerId: 'doctor-1',
+      date: new Date(Date.now() + 604800000).toISOString(),
       duration: 15,
-      type: 'follow_up',
+      type: 'routine',
       status: 'scheduled',
+      location: 'Room 101',
+      notes: 'Annual physical examination',
       created_at: new Date().toISOString()
     }
   ],
@@ -245,50 +272,122 @@ const DEMO_DATA = {
         duration_months: 3
       }
     }
+  ],
+  teamAssignments: [
+    {
+      id: 'team-1',
+      patientId: 'patient-1',
+      providerId: 'doctor-1',
+      role: 'primary_doctor',
+      assignedBy: 'admin-1',
+      assignedAt: new Date(Date.now() - 604800000).toISOString(),
+      isActive: true
+    },
+    {
+      id: 'team-2',
+      patientId: 'patient-1',
+      providerId: 'nurse-1',
+      role: 'primary_nurse',
+      assignedBy: 'doctor-1',
+      assignedAt: new Date(Date.now() - 604800000).toISOString(),
+      isActive: true
+    },
+    {
+      id: 'team-3',
+      patientId: 'patient-2',
+      providerId: 'doctor-1',
+      role: 'primary_doctor',
+      assignedBy: 'admin-1',
+      assignedAt: new Date(Date.now() - 432000000).toISOString(),
+      isActive: true
+    }
   ]
 }
 
+// Load data from localStorage or use initial data
+const loadDataFromStorage = () => {
+  try {
+    const saved = localStorage.getItem('healthcare_app_data')
+    if (saved) {
+      return JSON.parse(saved)
+    }
+  } catch (error) {
+    console.error('Error loading data from storage:', error)
+  }
+  return INITIAL_DEMO_DATA
+}
+
+// Save data to localStorage
+const saveDataToStorage = (data) => {
+  try {
+    localStorage.setItem('healthcare_app_data', JSON.stringify(data))
+  } catch (error) {
+    console.error('Error saving data to storage:', error)
+  }
+}
+
 export const DataProvider = ({ children }) => {
-  const { profile, isAdmin, isSponsor } = useAuth()
+  const { profile } = useAuth()
   
-  // Core data states
-  const [users, setUsers] = useState(DEMO_DATA.users)
-  const [patients, setPatients] = useState(DEMO_DATA.users.filter(u => u.role === 'patient'))
-  const [documents, setDocuments] = useState(DEMO_DATA.documents)
-  const [tasks, setTasks] = useState(DEMO_DATA.tasks)
-  const [appointments, setAppointments] = useState(DEMO_DATA.appointments)
-  const [advertisements, setAdvertisements] = useState(DEMO_DATA.advertisements)
-  const [adPackages, setAdPackages] = useState(DEMO_DATA.adPackages)
-  const [payments, setPayments] = useState(DEMO_DATA.payments)
-  const [adminStats, setAdminStats] = useState({
-    totalUsers: DEMO_DATA.users.length,
-    activeAds: DEMO_DATA.advertisements.filter(ad => ad.status === 'active').length,
-    totalRevenue: 5000,
-    pendingTasks: DEMO_DATA.tasks.filter(t => t.status === 'pending').length
-  })
-  
+  // Load initial data
+  const [data, setData] = useState(loadDataFromStorage)
   const [loading, setLoading] = useState(false)
+
+  // Save data whenever it changes
+  useEffect(() => {
+    saveDataToStorage(data)
+  }, [data])
 
   // Helper functions to get user-specific data
   const getUserTasks = () => {
     if (!profile) return []
-    return tasks.filter(task => task.assigned_to === profile.id)
+    return data.tasks.filter(task => task.assignedTo === profile.id)
   }
 
   const getPatientTasks = (patientId) => {
-    return tasks.filter(task => task.patient_id === patientId)
+    return data.tasks.filter(task => task.patientId === patientId)
   }
 
   const getPatientDocuments = (patientId) => {
-    return documents.filter(doc => doc.patient_id === patientId)
+    return data.documents.filter(doc => doc.patientId === patientId)
   }
 
   const getUserAppointments = (userId, role) => {
     if (role === 'patient') {
-      return appointments.filter(apt => apt.patient_id === userId)
+      return data.appointments.filter(apt => apt.patientId === userId)
     } else {
-      return appointments.filter(apt => apt.provider_id === userId)
+      return data.appointments.filter(apt => apt.providerId === userId)
     }
+  }
+
+  const getPatientAppointments = (patientId) => {
+    return data.appointments.filter(apt => apt.patientId === patientId)
+  }
+
+  const getPatientTeam = (patientId) => {
+    const assignments = data.teamAssignments.filter(
+      assignment => assignment.patientId === patientId && assignment.isActive
+    )
+    return assignments.map(assignment => {
+      const provider = data.users.find(user => user.id === assignment.providerId)
+      return {
+        ...assignment,
+        provider
+      }
+    })
+  }
+
+  const getProviderPatients = (providerId) => {
+    const assignments = data.teamAssignments.filter(
+      assignment => assignment.providerId === providerId && assignment.isActive
+    )
+    return assignments.map(assignment => {
+      const patient = data.users.find(user => user.id === assignment.patientId)
+      return {
+        ...assignment,
+        patient
+      }
+    })
   }
 
   // User Management Functions
@@ -300,10 +399,12 @@ export const DataProvider = ({ children }) => {
         created_at: new Date().toISOString(),
         is_active: true
       }
-      setUsers(prev => [newUser, ...prev])
-      if (newUser.role === 'patient') {
-        setPatients(prev => [newUser, ...prev])
-      }
+      
+      setData(prev => ({
+        ...prev,
+        users: [newUser, ...prev.users]
+      }))
+      
       toast.success('User created successfully!')
       return { success: true, user: newUser }
     } catch (error) {
@@ -315,14 +416,13 @@ export const DataProvider = ({ children }) => {
 
   const updateUser = async (userId, updates) => {
     try {
-      setUsers(prev => prev.map(user => 
-        user.id === userId ? { ...user, ...updates } : user
-      ))
-      if (updates.role === 'patient') {
-        setPatients(prev => prev.map(patient => 
-          patient.id === userId ? { ...patient, ...updates } : patient
-        ))
-      }
+      setData(prev => ({
+        ...prev,
+        users: prev.users.map(user => 
+          user.id === userId ? { ...user, ...updates } : user
+        )
+      }))
+      
       toast.success('User updated successfully!')
       return { success: true }
     } catch (error) {
@@ -334,8 +434,11 @@ export const DataProvider = ({ children }) => {
 
   const deleteUser = async (userId) => {
     try {
-      setUsers(prev => prev.filter(user => user.id !== userId))
-      setPatients(prev => prev.filter(patient => patient.id !== userId))
+      setData(prev => ({
+        ...prev,
+        users: prev.users.filter(user => user.id !== userId)
+      }))
+      
       toast.success('User deleted successfully!')
       return { success: true }
     } catch (error) {
@@ -346,45 +449,91 @@ export const DataProvider = ({ children }) => {
   }
 
   // Document Management
-  const addDocument = ({ title, description, type, patientId }) => {
-    const newDoc = {
-      id: `doc-${Date.now()}`,
-      title,
-      description,
-      type,
-      patient_id: patientId || profile?.id,
-      uploaded_by: profile?.id,
-      url: '#',
-      uploadedAt: new Date().toISOString(),
-      created_at: new Date().toISOString()
+  const addDocument = ({ title, description, type, patientId, file }) => {
+    try {
+      const newDoc = {
+        id: `doc-${Date.now()}`,
+        title,
+        description,
+        type,
+        patientId: patientId || profile?.id,
+        uploadedBy: profile?.id,
+        url: file ? URL.createObjectURL(file) : 'https://example.com/document.pdf',
+        fileName: file ? file.name : 'document.pdf',
+        fileSize: file ? file.size : 0,
+        uploadedAt: new Date().toISOString(),
+        created_at: new Date().toISOString()
+      }
+      
+      setData(prev => ({
+        ...prev,
+        documents: [newDoc, ...prev.documents]
+      }))
+      
+      toast.success('Document uploaded successfully!')
+      return { success: true, document: newDoc }
+    } catch (error) {
+      console.error('Error uploading document:', error)
+      toast.error('Error uploading document')
+      return { success: false, error: error.message }
     }
-    setDocuments(prev => [newDoc, ...prev])
-    toast.success('Document uploaded successfully!')
+  }
+
+  const deleteDocument = async (documentId) => {
+    try {
+      setData(prev => ({
+        ...prev,
+        documents: prev.documents.filter(doc => doc.id !== documentId)
+      }))
+      
+      toast.success('Document deleted successfully!')
+      return { success: true }
+    } catch (error) {
+      console.error('Error deleting document:', error)
+      toast.error('Error deleting document')
+      return { success: false, error: error.message }
+    }
   }
 
   // Task Management
   const addTask = ({ title, description, patientId, assignedTo, dueDate, priority }) => {
-    const newTask = {
-      id: `task-${Date.now()}`,
-      title,
-      description,
-      patient_id: patientId,
-      assigned_to: assignedTo || profile?.id,
-      assigned_by: profile?.id,
-      status: 'pending',
-      priority: priority || 'medium',
-      due_date: dueDate,
-      created_at: new Date().toISOString()
+    try {
+      const newTask = {
+        id: `task-${Date.now()}`,
+        title,
+        description,
+        patientId,
+        assignedTo: assignedTo || profile?.id,
+        assignedBy: profile?.id,
+        status: 'pending',
+        priority: priority || 'medium',
+        dueDate,
+        created_at: new Date().toISOString()
+      }
+      
+      setData(prev => ({
+        ...prev,
+        tasks: [newTask, ...prev.tasks]
+      }))
+      
+      toast.success('Task created successfully!')
+      return { success: true, task: newTask }
+    } catch (error) {
+      console.error('Error creating task:', error)
+      toast.error('Error creating task')
+      return { success: false, error: error.message }
     }
-    setTasks(prev => [newTask, ...prev])
-    toast.success('Task created successfully!')
   }
 
   const updateTask = async (taskId, updates) => {
     try {
-      setTasks(prev => prev.map(task => 
-        task.id === taskId ? { ...task, ...updates } : task
-      ))
+      setData(prev => ({
+        ...prev,
+        tasks: prev.tasks.map(task => 
+          task.id === taskId ? { ...task, ...updates } : task
+        )
+      }))
+      
       toast.success('Task updated successfully!')
       return { success: true }
     } catch (error) {
@@ -394,24 +543,133 @@ export const DataProvider = ({ children }) => {
     }
   }
 
+  const deleteTask = async (taskId) => {
+    try {
+      setData(prev => ({
+        ...prev,
+        tasks: prev.tasks.filter(task => task.id !== taskId)
+      }))
+      
+      toast.success('Task deleted successfully!')
+      return { success: true }
+    } catch (error) {
+      console.error('Error deleting task:', error)
+      toast.error('Error deleting task')
+      return { success: false, error: error.message }
+    }
+  }
+
   // Appointment Management
   const addAppointment = ({ title, patientId, date, time, duration, type, location, notes }) => {
-    const appointmentDateTime = new Date(`${date}T${time}`)
-    const newAppointment = {
-      id: `apt-${Date.now()}`,
-      title,
-      patient_id: patientId,
-      provider_id: profile?.role === 'doctor' ? profile.id : 'doctor-1',
-      appointment_date: appointmentDateTime.toISOString(),
-      duration: duration || 30,
-      type: type || 'consultation',
-      location,
-      notes,
-      status: 'scheduled',
-      created_at: new Date().toISOString()
+    try {
+      const appointmentDateTime = new Date(`${date}T${time}`)
+      const newAppointment = {
+        id: `apt-${Date.now()}`,
+        title,
+        patientId,
+        providerId: profile?.role === 'doctor' ? profile.id : 'doctor-1',
+        date: appointmentDateTime.toISOString(),
+        duration: duration || 30,
+        type: type || 'consultation',
+        location,
+        notes,
+        status: 'scheduled',
+        created_at: new Date().toISOString()
+      }
+      
+      setData(prev => ({
+        ...prev,
+        appointments: [newAppointment, ...prev.appointments]
+      }))
+      
+      toast.success('Appointment created successfully!')
+      return { success: true, appointment: newAppointment }
+    } catch (error) {
+      console.error('Error creating appointment:', error)
+      toast.error('Error creating appointment')
+      return { success: false, error: error.message }
     }
-    setAppointments(prev => [newAppointment, ...prev])
-    toast.success('Appointment created successfully!')
+  }
+
+  const updateAppointment = async (appointmentId, updates) => {
+    try {
+      setData(prev => ({
+        ...prev,
+        appointments: prev.appointments.map(apt => 
+          apt.id === appointmentId ? { ...apt, ...updates } : apt
+        )
+      }))
+      
+      toast.success('Appointment updated successfully!')
+      return { success: true }
+    } catch (error) {
+      console.error('Error updating appointment:', error)
+      toast.error('Error updating appointment')
+      return { success: false, error: error.message }
+    }
+  }
+
+  const deleteAppointment = async (appointmentId) => {
+    try {
+      setData(prev => ({
+        ...prev,
+        appointments: prev.appointments.filter(apt => apt.id !== appointmentId)
+      }))
+      
+      toast.success('Appointment deleted successfully!')
+      return { success: true }
+    } catch (error) {
+      console.error('Error deleting appointment:', error)
+      toast.error('Error deleting appointment')
+      return { success: false, error: error.message }
+    }
+  }
+
+  // Team Management
+  const assignProviderToPatient = ({ patientId, providerId, role }) => {
+    try {
+      const newAssignment = {
+        id: `team-${Date.now()}`,
+        patientId,
+        providerId,
+        role,
+        assignedBy: profile?.id,
+        assignedAt: new Date().toISOString(),
+        isActive: true
+      }
+      
+      setData(prev => ({
+        ...prev,
+        teamAssignments: [newAssignment, ...prev.teamAssignments]
+      }))
+      
+      toast.success('Provider assigned successfully!')
+      return { success: true, assignment: newAssignment }
+    } catch (error) {
+      console.error('Error assigning provider:', error)
+      toast.error('Error assigning provider')
+      return { success: false, error: error.message }
+    }
+  }
+
+  const removeProviderFromPatient = (assignmentId) => {
+    try {
+      setData(prev => ({
+        ...prev,
+        teamAssignments: prev.teamAssignments.map(assignment =>
+          assignment.id === assignmentId 
+            ? { ...assignment, isActive: false }
+            : assignment
+        )
+      }))
+      
+      toast.success('Provider removed from team!')
+      return { success: true }
+    } catch (error) {
+      console.error('Error removing provider:', error)
+      toast.error('Error removing provider')
+      return { success: false, error: error.message }
+    }
   }
 
   // Advertisement Management
@@ -430,7 +688,12 @@ export const DataProvider = ({ children }) => {
           full_name: profile?.full_name
         }
       }
-      setAdvertisements(prev => [newAd, ...prev])
+      
+      setData(prev => ({
+        ...prev,
+        advertisements: [newAd, ...prev.advertisements]
+      }))
+      
       toast.success('Advertisement created successfully!')
       return { success: true, advertisement: newAd }
     } catch (error) {
@@ -442,9 +705,13 @@ export const DataProvider = ({ children }) => {
 
   const updateAdvertisement = async (adId, updates) => {
     try {
-      setAdvertisements(prev => prev.map(ad => 
-        ad.id === adId ? { ...ad, ...updates } : ad
-      ))
+      setData(prev => ({
+        ...prev,
+        advertisements: prev.advertisements.map(ad => 
+          ad.id === adId ? { ...ad, ...updates } : ad
+        )
+      }))
+      
       if (updates.status) {
         toast.success(`Advertisement ${updates.status} successfully!`)
       }
@@ -458,7 +725,11 @@ export const DataProvider = ({ children }) => {
 
   const deleteAdvertisement = async (adId) => {
     try {
-      setAdvertisements(prev => prev.filter(ad => ad.id !== adId))
+      setData(prev => ({
+        ...prev,
+        advertisements: prev.advertisements.filter(ad => ad.id !== adId)
+      }))
+      
       toast.success('Advertisement deleted successfully!')
       return { success: true }
     } catch (error) {
@@ -476,7 +747,12 @@ export const DataProvider = ({ children }) => {
         ...packageData,
         created_at: new Date().toISOString()
       }
-      setAdPackages(prev => [...prev, newPackage])
+      
+      setData(prev => ({
+        ...prev,
+        adPackages: [...prev.adPackages, newPackage]
+      }))
+      
       toast.success('Package created successfully!')
       return { success: true, package: newPackage }
     } catch (error) {
@@ -488,9 +764,13 @@ export const DataProvider = ({ children }) => {
 
   const updateAdPackage = async (packageId, updates) => {
     try {
-      setAdPackages(prev => prev.map(pkg => 
-        pkg.id === packageId ? { ...pkg, ...updates } : pkg
-      ))
+      setData(prev => ({
+        ...prev,
+        adPackages: prev.adPackages.map(pkg => 
+          pkg.id === packageId ? { ...pkg, ...updates } : pkg
+        )
+      }))
+      
       toast.success('Package updated successfully!')
       return { success: true }
     } catch (error) {
@@ -509,7 +789,12 @@ export const DataProvider = ({ children }) => {
         user_id: profile?.id,
         created_at: new Date().toISOString()
       }
-      setPayments(prev => [newPayment, ...prev])
+      
+      setData(prev => ({
+        ...prev,
+        payments: [newPayment, ...prev.payments]
+      }))
+      
       toast.success('Payment processed successfully!')
       return { success: true, payment: newPayment }
     } catch (error) {
@@ -521,31 +806,48 @@ export const DataProvider = ({ children }) => {
 
   // Analytics
   const trackAdImpression = async (adId) => {
-    setAdvertisements(prev => prev.map(ad => 
-      ad.id === adId 
-        ? { ...ad, total_impressions: (ad.total_impressions || 0) + 1 }
-        : ad
-    ))
+    setData(prev => ({
+      ...prev,
+      advertisements: prev.advertisements.map(ad => 
+        ad.id === adId 
+          ? { ...ad, total_impressions: (ad.total_impressions || 0) + 1 }
+          : ad
+      )
+    }))
   }
 
   const trackAdClick = async (adId) => {
-    setAdvertisements(prev => prev.map(ad => 
-      ad.id === adId 
-        ? { ...ad, total_clicks: (ad.total_clicks || 0) + 1 }
-        : ad
-    ))
+    setData(prev => ({
+      ...prev,
+      advertisements: prev.advertisements.map(ad => 
+        ad.id === adId 
+          ? { ...ad, total_clicks: (ad.total_clicks || 0) + 1 }
+          : ad
+      )
+    }))
+  }
+
+  // Admin Stats
+  const adminStats = {
+    totalUsers: data.users.length,
+    activeAds: data.advertisements.filter(ad => ad.status === 'active').length,
+    totalRevenue: data.payments
+      .filter(p => p.status === 'succeeded')
+      .reduce((sum, p) => sum + p.amount_euros, 0),
+    pendingTasks: data.tasks.filter(t => t.status === 'pending').length
   }
 
   const value = {
     // Data
-    users,
-    patients,
-    documents,
-    tasks,
-    appointments,
-    advertisements,
-    adPackages,
-    payments,
+    users: data.users,
+    patients: data.users.filter(u => u.role === 'patient'),
+    documents: data.documents,
+    tasks: data.tasks,
+    appointments: data.appointments,
+    advertisements: data.advertisements,
+    adPackages: data.adPackages,
+    payments: data.payments,
+    teamAssignments: data.teamAssignments,
     adminStats,
     loading,
     
@@ -554,6 +856,9 @@ export const DataProvider = ({ children }) => {
     getPatientTasks,
     getPatientDocuments,
     getUserAppointments,
+    getPatientAppointments,
+    getPatientTeam,
+    getProviderPatients,
     
     // User Management
     createUser,
@@ -562,13 +867,21 @@ export const DataProvider = ({ children }) => {
     
     // Document Management
     addDocument,
+    deleteDocument,
     
     // Task Management
     addTask,
     updateTask,
+    deleteTask,
     
     // Appointment Management
     addAppointment,
+    updateAppointment,
+    deleteAppointment,
+    
+    // Team Management
+    assignProviderToPatient,
+    removeProviderFromPatient,
     
     // Advertisement Management
     createAdvertisement,

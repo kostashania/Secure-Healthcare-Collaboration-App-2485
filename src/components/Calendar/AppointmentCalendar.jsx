@@ -5,13 +5,14 @@ import { useData } from '../../contexts/DataContext';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiCalendar, FiPlus, FiClock, FiUser, FiMapPin, FiVideo } = FiIcons;
+const { FiCalendar, FiPlus, FiClock, FiUser, FiMapPin, FiVideo, FiEdit, FiTrash2 } = FiIcons;
 
 const AppointmentCalendar = () => {
-  const { user } = useAuth();
-  const { appointments, patients, addAppointment, getPatientAppointments } = useData();
+  const { profile } = useAuth();
+  const { appointments, patients, addAppointment, updateAppointment, deleteAppointment, getPatientAppointments } = useData();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editingAppointment, setEditingAppointment] = useState(null);
   const [selectedPatient, setSelectedPatient] = useState(patients[0]?.id || '');
   const [appointmentData, setAppointmentData] = useState({
     title: '',
@@ -27,15 +28,15 @@ const AppointmentCalendar = () => {
   const getAppointmentsForDate = (date) => {
     const dateStr = date.toDateString();
     let appointmentsToShow = [];
-    
-    if (user?.role === 'patient') {
-      appointmentsToShow = appointments.filter(apt => apt.patientId === user.id);
+
+    if (profile?.role === 'patient') {
+      appointmentsToShow = appointments.filter(apt => apt.patientId === profile.id);
     } else if (selectedPatient) {
       appointmentsToShow = getPatientAppointments(selectedPatient);
     } else {
       appointmentsToShow = appointments;
     }
-    
+
     return appointmentsToShow.filter(apt => 
       new Date(apt.date).toDateString() === dateStr
     );
@@ -48,7 +49,7 @@ const AppointmentCalendar = () => {
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
     const startingDayOfWeek = firstDay.getDay();
-
+    
     const days = [];
     
     // Add empty cells for days before the first day of the month
@@ -67,16 +68,28 @@ const AppointmentCalendar = () => {
   const handleCreateAppointment = (e) => {
     e.preventDefault();
     
-    const appointmentDateTime = new Date(`${appointmentData.date}T${appointmentData.time}`);
-    
-    addAppointment({
-      ...appointmentData,
-      date: appointmentDateTime.toISOString(),
-      patientId: user?.role === 'patient' ? user.id : appointmentData.patientId,
-      doctorId: user?.role === 'doctor' ? user.id : 'doctor-1'
-    });
+    if (editingAppointment) {
+      const appointmentDateTime = new Date(`${appointmentData.date}T${appointmentData.time}`);
+      updateAppointment(editingAppointment.id, {
+        ...appointmentData,
+        date: appointmentDateTime.toISOString(),
+        patientId: profile?.role === 'patient' ? profile.id : appointmentData.patientId,
+        providerId: profile?.role === 'doctor' ? profile.id : 'doctor-1'
+      });
+      setEditingAppointment(null);
+    } else {
+      addAppointment({
+        ...appointmentData,
+        patientId: profile?.role === 'patient' ? profile.id : appointmentData.patientId,
+        providerId: profile?.role === 'doctor' ? profile.id : 'doctor-1'
+      });
+    }
     
     setShowCreateModal(false);
+    resetForm();
+  };
+
+  const resetForm = () => {
     setAppointmentData({
       title: '',
       patientId: '',
@@ -87,6 +100,28 @@ const AppointmentCalendar = () => {
       location: '',
       notes: ''
     });
+  };
+
+  const handleEditAppointment = (appointment) => {
+    const appointmentDate = new Date(appointment.date);
+    setAppointmentData({
+      title: appointment.title,
+      patientId: appointment.patientId,
+      date: appointmentDate.toISOString().split('T')[0],
+      time: appointmentDate.toTimeString().slice(0, 5),
+      duration: appointment.duration,
+      type: appointment.type,
+      location: appointment.location || '',
+      notes: appointment.notes || ''
+    });
+    setEditingAppointment(appointment);
+    setShowCreateModal(true);
+  };
+
+  const handleDeleteAppointment = (appointmentId) => {
+    if (window.confirm('Are you sure you want to delete this appointment?')) {
+      deleteAppointment(appointmentId);
+    }
   };
 
   const appointmentTypes = [
@@ -115,17 +150,41 @@ const AppointmentCalendar = () => {
             Manage appointments and schedule healthcare visits
           </p>
         </div>
-
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => setShowCreateModal(true)}
+          onClick={() => {
+            resetForm();
+            setEditingAppointment(null);
+            setShowCreateModal(true);
+          }}
           className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
         >
           <SafeIcon icon={FiPlus} className="w-4 h-4" />
           <span>Book Appointment</span>
         </motion.button>
       </div>
+
+      {/* Patient Selector for non-patients */}
+      {profile?.role !== 'patient' && (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Select Patient
+          </label>
+          <select
+            value={selectedPatient}
+            onChange={(e) => setSelectedPatient(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">All patients</option>
+            {patients.map((patient) => (
+              <option key={patient.id} value={patient.id}>
+                {patient.full_name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calendar */}
@@ -169,7 +228,7 @@ const AppointmentCalendar = () => {
               const isToday = day && day.toDateString() === new Date().toDateString();
               const isSelected = day && day.toDateString() === selectedDate.toDateString();
               const dayAppointments = day ? getAppointmentsForDate(day) : [];
-              
+
               return (
                 <motion.button
                   key={index}
@@ -177,10 +236,13 @@ const AppointmentCalendar = () => {
                   whileTap={day ? { scale: 0.95 } : {}}
                   onClick={() => day && setSelectedDate(day)}
                   className={`aspect-square p-2 text-sm relative ${
-                    !day ? '' :
-                    isSelected ? 'bg-blue-600 text-white' :
-                    isToday ? 'bg-blue-50 text-blue-600 font-medium' :
-                    'hover:bg-gray-100'
+                    !day
+                      ? ''
+                      : isSelected
+                      ? 'bg-blue-600 text-white'
+                      : isToday
+                      ? 'bg-blue-50 text-blue-600 font-medium'
+                      : 'hover:bg-gray-100'
                   } rounded-lg transition-colors`}
                   disabled={!day}
                 >
@@ -207,17 +269,32 @@ const AppointmentCalendar = () => {
             <h3 className="font-semibold text-gray-900 mb-4">Today's Appointments</h3>
             <div className="space-y-3">
               {todayAppointments.map((apt) => (
-                <div key={apt.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className={`w-3 h-3 rounded-full bg-${getTypeColor(apt.type)}-500`} />
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900">{apt.title}</p>
-                    <p className="text-sm text-gray-600">
-                      {new Date(apt.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </p>
+                <div key={apt.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-3 h-3 rounded-full bg-${getTypeColor(apt.type)}-500`} />
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">{apt.title}</p>
+                      <p className="text-sm text-gray-600">
+                        {new Date(apt.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <button
+                      onClick={() => handleEditAppointment(apt)}
+                      className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                    >
+                      <SafeIcon icon={FiEdit} className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteAppointment(apt.id)}
+                      className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                    >
+                      <SafeIcon icon={FiTrash2} className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
               ))}
-              
               {todayAppointments.length === 0 && (
                 <p className="text-gray-500 text-center py-4">No appointments today</p>
               )}
@@ -235,11 +312,24 @@ const AppointmentCalendar = () => {
                   <div key={apt.id} className="p-4 border border-gray-200 rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="font-medium text-gray-900">{apt.title}</h4>
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full bg-${getTypeColor(apt.type)}-100 text-${getTypeColor(apt.type)}-800`}>
-                        {appointmentTypes.find(t => t.value === apt.type)?.label}
-                      </span>
+                      <div className="flex items-center space-x-2">
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full bg-${getTypeColor(apt.type)}-100 text-${getTypeColor(apt.type)}-800`}>
+                          {appointmentTypes.find(t => t.value === apt.type)?.label}
+                        </span>
+                        <button
+                          onClick={() => handleEditAppointment(apt)}
+                          className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                        >
+                          <SafeIcon icon={FiEdit} className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteAppointment(apt.id)}
+                          className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                        >
+                          <SafeIcon icon={FiTrash2} className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
-                    
                     <div className="flex items-center space-x-4 text-sm text-gray-600">
                       <div className="flex items-center space-x-1">
                         <SafeIcon icon={FiClock} className="w-4 h-4" />
@@ -248,10 +338,18 @@ const AppointmentCalendar = () => {
                           {apt.duration && ` (${apt.duration}min)`}
                         </span>
                       </div>
+                      {apt.location && (
+                        <div className="flex items-center space-x-1">
+                          <SafeIcon icon={FiMapPin} className="w-4 h-4" />
+                          <span>{apt.location}</span>
+                        </div>
+                      )}
                     </div>
+                    {apt.notes && (
+                      <p className="text-sm text-gray-600 mt-2">{apt.notes}</p>
+                    )}
                   </div>
                 ))}
-                
                 {selectedDateAppointments.length === 0 && (
                   <p className="text-gray-500 text-center py-4">No appointments on this date</p>
                 )}
@@ -261,7 +359,7 @@ const AppointmentCalendar = () => {
         </div>
       </div>
 
-      {/* Create Appointment Modal */}
+      {/* Create/Edit Appointment Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <motion.div
@@ -269,8 +367,9 @@ const AppointmentCalendar = () => {
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto"
           >
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Book New Appointment</h2>
-            
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              {editingAppointment ? 'Edit Appointment' : 'Book New Appointment'}
+            </h2>
             <form onSubmit={handleCreateAppointment} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -303,7 +402,7 @@ const AppointmentCalendar = () => {
                 </select>
               </div>
 
-              {user?.role !== 'patient' && (
+              {profile?.role !== 'patient' && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Patient
@@ -317,7 +416,7 @@ const AppointmentCalendar = () => {
                     <option value="">Select patient</option>
                     {patients.map((patient) => (
                       <option key={patient.id} value={patient.id}>
-                        {patient.name}
+                        {patient.full_name}
                       </option>
                     ))}
                   </select>
@@ -337,7 +436,6 @@ const AppointmentCalendar = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Time
@@ -371,6 +469,19 @@ const AppointmentCalendar = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Location (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={appointmentData.location}
+                  onChange={(e) => setAppointmentData({ ...appointmentData, location: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., Room 205, Video Call"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Notes (Optional)
                 </label>
                 <textarea
@@ -389,13 +500,17 @@ const AppointmentCalendar = () => {
                   whileTap={{ scale: 0.98 }}
                   className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  Book Appointment
+                  {editingAppointment ? 'Update Appointment' : 'Book Appointment'}
                 </motion.button>
                 <motion.button
                   type="button"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => setShowCreateModal(false)}
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setEditingAppointment(null);
+                    resetForm();
+                  }}
                   className="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 transition-colors"
                 >
                   Cancel
