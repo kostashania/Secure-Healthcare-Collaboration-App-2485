@@ -7,7 +7,7 @@ import * as FiIcons from 'react-icons/fi';
 
 const { FiUsers, FiFileText, FiCalendar, FiCheckSquare, FiClock, FiTrendingUp, FiPlus } = FiIcons;
 
-const Dashboard = () => {
+const Dashboard = ({ onNavigate }) => {
   const { profile } = useAuth();
   const { 
     patients, 
@@ -122,6 +122,13 @@ const Dashboard = () => {
   };
 
   const recentActivities = getRecentActivities();
+
+  // Quick action handlers
+  const handleQuickAction = (action) => {
+    if (onNavigate) {
+      onNavigate(action);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -278,6 +285,7 @@ const Dashboard = () => {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={() => handleQuickAction('documents')}
                 className="flex flex-col items-center p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
               >
                 <SafeIcon icon={FiFileText} className="w-6 h-6 text-blue-600 mb-2" />
@@ -286,6 +294,7 @@ const Dashboard = () => {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={() => handleQuickAction('appointments')}
                 className="flex flex-col items-center p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
               >
                 <SafeIcon icon={FiCalendar} className="w-6 h-6 text-blue-600 mb-2" />
@@ -299,6 +308,7 @@ const Dashboard = () => {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={() => handleQuickAction('patients')}
                 className="flex flex-col items-center p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
               >
                 <SafeIcon icon={FiUsers} className="w-6 h-6 text-green-600 mb-2" />
@@ -307,6 +317,7 @@ const Dashboard = () => {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={() => handleQuickAction('tasks')}
                 className="flex flex-col items-center p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
               >
                 <SafeIcon icon={FiCheckSquare} className="w-6 h-6 text-green-600 mb-2" />
@@ -320,6 +331,7 @@ const Dashboard = () => {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={() => handleQuickAction('tasks')}
                 className="flex flex-col items-center p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors"
               >
                 <SafeIcon icon={FiCheckSquare} className="w-6 h-6 text-purple-600 mb-2" />
@@ -328,6 +340,7 @@ const Dashboard = () => {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={() => handleQuickAction('documents')}
                 className="flex flex-col items-center p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors"
               >
                 <SafeIcon icon={FiFileText} className="w-6 h-6 text-purple-600 mb-2" />

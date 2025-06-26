@@ -14,7 +14,12 @@ import TaskManager from './components/Tasks/TaskManager'
 import AppointmentCalendar from './components/Calendar/AppointmentCalendar'
 import TeamManager from './components/Team/TeamManager'
 import AdminDashboard from './components/Admin/AdminDashboard'
+import AdminUsers from './components/Admin/AdminUsers'
+import AdminAdvertisements from './components/Admin/AdminAdvertisements'
+import AdminAnalytics from './components/Admin/AdminAnalytics'
+import AdminSettings from './components/Admin/AdminSettings'
 import SponsorDashboard from './components/Sponsor/SponsorDashboard'
+import PatientManagement from './components/Patients/PatientManagement'
 import './App.css'
 
 const AppContent = () => {
@@ -57,11 +62,15 @@ const AppContent = () => {
     if (profile.role === 'admin') {
       switch (activeTab) {
         case 'admin':
-        case 'users':
-        case 'advertisements':
-        case 'analytics':
-        case 'settings':
           return <AdminDashboard />
+        case 'users':
+          return <AdminUsers />
+        case 'advertisements':
+          return <AdminAdvertisements />
+        case 'analytics':
+          return <AdminAnalytics />
+        case 'settings':
+          return <AdminSettings />
         default:
           return <AdminDashboard />
       }
@@ -83,7 +92,7 @@ const AppContent = () => {
     // Regular user routes
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard />
+        return <Dashboard onNavigate={setActiveTab} />
       case 'documents':
         return <DocumentManager />
       case 'tasks':
@@ -93,13 +102,9 @@ const AppContent = () => {
       case 'team':
         return <TeamManager />
       case 'patients':
-        return (
-          <div className="text-center py-12">
-            <p className="text-gray-500">Patient management coming soon...</p>
-          </div>
-        )
+        return <PatientManagement />
       default:
-        return <Dashboard />
+        return <Dashboard onNavigate={setActiveTab} />
     }
   }
 

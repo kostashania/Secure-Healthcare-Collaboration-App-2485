@@ -4,7 +4,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import SafeIcon from '../../common/SafeIcon'
 import * as FiIcons from 'react-icons/fi'
 
-const { FiHome, FiUsers, FiFileText, FiCalendar, FiCheckSquare, FiSettings, FiEye, FiDollarSign, FiShield } = FiIcons
+const { FiHome, FiUsers, FiFileText, FiCalendar, FiCheckSquare, FiSettings, FiEye, FiDollarSign, FiShield, FiBarChart } = FiIcons
 
 const Navigation = ({ activeTab, setActiveTab }) => {
   const { profile } = useAuth()
@@ -29,21 +29,23 @@ const Navigation = ({ activeTab, setActiveTab }) => {
           { id: 'patients', label: 'Patients', icon: FiUsers },
           { id: 'appointments', label: 'Appointments', icon: FiCalendar },
           { id: 'tasks', label: 'Tasks', icon: FiCheckSquare },
-          { id: 'documents', label: 'Documents', icon: FiFileText }
+          { id: 'documents', label: 'Documents', icon: FiFileText },
+          { id: 'team', label: 'Team', icon: FiUsers }
         ]
       case 'nurse':
         return [
           ...baseItems,
           { id: 'patients', label: 'Patients', icon: FiUsers },
           { id: 'tasks', label: 'Tasks', icon: FiCheckSquare },
-          { id: 'documents', label: 'Documents', icon: FiFileText }
+          { id: 'documents', label: 'Documents', icon: FiFileText },
+          { id: 'team', label: 'Team', icon: FiUsers }
         ]
       case 'admin':
         return [
           { id: 'admin', label: 'Admin Panel', icon: FiShield },
           { id: 'users', label: 'Users', icon: FiUsers },
           { id: 'advertisements', label: 'Advertisements', icon: FiEye },
-          { id: 'analytics', label: 'Analytics', icon: FiDollarSign },
+          { id: 'analytics', label: 'Analytics', icon: FiBarChart },
           { id: 'settings', label: 'Settings', icon: FiSettings }
         ]
       case 'sponsor':
@@ -51,7 +53,7 @@ const Navigation = ({ activeTab, setActiveTab }) => {
           { id: 'sponsor', label: 'Sponsor Panel', icon: FiEye },
           { id: 'advertisements', label: 'My Ads', icon: FiEye },
           { id: 'packages', label: 'Packages', icon: FiDollarSign },
-          { id: 'analytics', label: 'Analytics', icon: FiDollarSign }
+          { id: 'analytics', label: 'Analytics', icon: FiBarChart }
         ]
       default:
         return baseItems
@@ -60,12 +62,18 @@ const Navigation = ({ activeTab, setActiveTab }) => {
 
   const getRoleColor = (role) => {
     switch (role) {
-      case 'patient': return 'patient'
-      case 'doctor': return 'doctor'
-      case 'nurse': return 'nurse'
-      case 'admin': return 'red'
-      case 'sponsor': return 'green'
-      default: return 'gray'
+      case 'patient':
+        return 'blue'
+      case 'doctor':
+        return 'green'
+      case 'nurse':
+        return 'purple'
+      case 'admin':
+        return 'red'
+      case 'sponsor':
+        return 'yellow'
+      default:
+        return 'gray'
     }
   }
 
