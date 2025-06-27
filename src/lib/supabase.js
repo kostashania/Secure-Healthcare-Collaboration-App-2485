@@ -5,7 +5,7 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-project-i
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key'
 
 if (supabaseUrl === 'https://your-project-id.supabase.co' || supabaseKey === 'your-anon-key') {
-  console.warn('⚠️  Please update your Supabase credentials in .env file')
+  console.warn('⚠️ Please update your Supabase credentials in .env file')
 }
 
 export const supabase = createClient(supabaseUrl, supabaseKey, {
@@ -18,7 +18,7 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
 
 // Database helper functions
 export const dbHelpers = {
-  // User Profile Management
+  // User Profile Management with AMKA validation
   async getUserProfile(authUserId) {
     const { data, error } = await supabase
       .from('user_profiles_hc2024')
@@ -53,58 +53,11 @@ export const dbHelpers = {
     return data
   },
 
-  async deleteUserProfile(profileId) {
-    const { error } = await supabase
-      .from('user_profiles_hc2024')
-      .delete()
-      .eq('id', profileId)
-    
-    if (error) throw error
-  },
-
-  // Admin Functions
-  async getAllUsers() {
+  // Connection Requests Management
+  async createConnectionRequest(requestData) {
     const { data, error } = await supabase
-      .from('user_profiles_hc2024')
-      .select('*')
-      .order('created_at', { ascending: false })
-    
-    if (error) throw error
-    return data
-  },
-
-  async getAllUsersByRole(role) {
-    const { data, error } = await supabase
-      .from('user_profiles_hc2024')
-      .select('*')
-      .eq('role', role)
-      .eq('is_active', true)
-      .order('full_name')
-    
-    if (error) throw error
-    return data
-  },
-
-  // Patient Assignments
-  async getPatientAssignments(patientId) {
-    const { data, error } = await supabase
-      .from('patient_assignments_hc2024')
-      .select(`
-        *,
-        provider:provider_id(id, full_name, role, specialization),
-        assigned_by_user:assigned_by(full_name)
-      `)
-      .eq('patient_id', patientId)
-      .eq('is_active', true)
-    
-    if (error) throw error
-    return data
-  },
-
-  async createPatientAssignment(assignmentData) {
-    const { data, error } = await supabase
-      .from('patient_assignments_hc2024')
-      .insert([assignmentData])
+      .from('connection_requests_hc2024')
+      .insert([requestData])
       .select()
       .single()
     
@@ -112,26 +65,143 @@ export const dbHelpers = {
     return data
   },
 
-  async getProviderPatients(providerId) {
-    const { data, error } = await supabase
-      .from('patient_assignments_hc2024')
+  async getConnectionRequests(userId, role) {
+    let query = supabase
+      .from('connection_requests_hc2024')
       .select(`
         *,
-        patient:patient_id(*)
+        requester:requester_id(*),
+        recipient:recipient_id(*)
       `)
-      .eq('provider_id', providerId)
+    
+    if (role === 'patient') {
+      query = query.or(`requester_id.eq.${userId},recipient_id.eq.${userId}`)
+    } else if (role === 'doctor') {
+      query = query.or(`requester_id.eq.${userId},recipient_id.eq.${userId}`)
+    } else if (role === 'nurse') {
+      query = query.or(`requester_id.eq.${userId},recipient_id.eq.${userId}`)
+    } else if (role === 'admin' || role === 'office_manager') {
+      // Admin and office manager can see all requests
+    }
+    
+    const { data, error } = await query
+    if (error) throw error
+    return data
+  },
+
+  async updateConnectionRequest(requestId, updates) {
+    const { data, error } = await supabase
+      .from('connection_requests_hc2024')
+      .update(updates)
+      .eq('id', requestId)
+      .select()
+      .single()
+    
+    if (error) throw error
+    return data
+  },
+
+  // User Connections Management
+  async createUserConnection(connectionData) {
+    const { data, error } = await supabase
+      .from('user_connections_hc2024')
+      .insert([connectionData])
+      .select()
+      .single()
+    
+    if (error) throw error
+    return data
+  },
+
+  async getUserConnections(userId, role) {
+    const { data, error } = await supabase
+      .from('user_connections_hc2024')
+      .select(`
+        *,
+        user1:user1_id(*),
+        user2:user2_id(*)
+      `)
+      .or(`user1_id.eq.${userId},user2_id.eq.${userId}`)
       .eq('is_active', true)
     
     if (error) throw error
-    return data?.map(assignment => assignment.patient) || []
+    return data
   },
 
-  // Documents
+  async removeUserConnection(connectionId) {
+    const { error } = await supabase
+      .from('user_connections_hc2024')
+      .update({ is_active: false })
+      .eq('id', connectionId)
+    
+    if (error) throw error
+  },
+
+  // Document Types Management
+  async getDocumentTypes() {
+    const { data, error } = await supabase
+      .from('document_types_hc2024')
+      .select('*')
+      .eq('is_active', true)
+      .order('name')
+    
+    if (error) throw error
+    return data
+  },
+
+  async createDocumentType(typeData) {
+    const { data, error } = await supabase
+      .from('document_types_hc2024')
+      .insert([typeData])
+      .select()
+      .single()
+    
+    if (error) throw error
+    return data
+  },
+
+  async updateDocumentType(typeId, updates) {
+    const { data, error } = await supabase
+      .from('document_types_hc2024')
+      .update(updates)
+      .eq('id', typeId)
+      .select()
+      .single()
+    
+    if (error) throw error
+    return data
+  },
+
+  // Document Tags Management
+  async getDocumentTags(documentId) {
+    const { data, error } = await supabase
+      .from('document_tags_hc2024')
+      .select('*')
+      .eq('document_id', documentId)
+    
+    if (error) throw error
+    return data
+  },
+
+  async createDocumentTag(tagData) {
+    const { data, error } = await supabase
+      .from('document_tags_hc2024')
+      .insert([tagData])
+      .select()
+      .single()
+    
+    if (error) throw error
+    return data
+  },
+
+  // Enhanced Documents with Tags and Categories
   async getPatientDocuments(patientId) {
     const { data, error } = await supabase
       .from('documents_hc2024')
       .select(`
         *,
+        document_type:type_id(*),
+        tags:document_tags_hc2024(*),
         uploaded_by_user:uploaded_by(full_name)
       `)
       .eq('patient_id', patientId)
@@ -152,50 +222,22 @@ export const dbHelpers = {
     return data
   },
 
-  async deleteDocument(documentId) {
-    const { error } = await supabase
-      .from('documents_hc2024')
-      .delete()
-      .eq('id', documentId)
-    
-    if (error) throw error
-  },
-
-  // Tasks
-  async getUserTasks(userId) {
+  // Examination Rooms Management
+  async getExaminationRooms() {
     const { data, error } = await supabase
-      .from('tasks_hc2024')
-      .select(`
-        *,
-        patient:patient_id(full_name),
-        assigned_by_user:assigned_by(full_name)
-      `)
-      .eq('assigned_to', userId)
-      .order('created_at', { ascending: false })
+      .from('examination_rooms_hc2024')
+      .select('*')
+      .eq('is_active', true)
+      .order('name')
     
     if (error) throw error
     return data
   },
 
-  async getPatientTasks(patientId) {
+  async createExaminationRoom(roomData) {
     const { data, error } = await supabase
-      .from('tasks_hc2024')
-      .select(`
-        *,
-        assigned_to_user:assigned_to(full_name),
-        assigned_by_user:assigned_by(full_name)
-      `)
-      .eq('patient_id', patientId)
-      .order('created_at', { ascending: false })
-    
-    if (error) throw error
-    return data
-  },
-
-  async createTask(taskData) {
-    const { data, error } = await supabase
-      .from('tasks_hc2024')
-      .insert([taskData])
+      .from('examination_rooms_hc2024')
+      .insert([roomData])
       .select()
       .single()
     
@@ -203,11 +245,11 @@ export const dbHelpers = {
     return data
   },
 
-  async updateTask(taskId, updates) {
+  async updateExaminationRoom(roomId, updates) {
     const { data, error } = await supabase
-      .from('tasks_hc2024')
+      .from('examination_rooms_hc2024')
       .update(updates)
-      .eq('id', taskId)
+      .eq('id', roomId)
       .select()
       .single()
     
@@ -215,33 +257,37 @@ export const dbHelpers = {
     return data
   },
 
-  async deleteTask(taskId) {
-    const { error } = await supabase
-      .from('tasks_hc2024')
-      .delete()
-      .eq('id', taskId)
-    
-    if (error) throw error
-  },
-
-  // Appointments
-  async getUserAppointments(userId, role) {
+  // Enhanced Appointments with QR codes, memos, and room assignments
+  async getAppointments(userId, role, filters = {}) {
     let query = supabase
       .from('appointments_hc2024')
       .select(`
         *,
-        patient:patient_id(full_name),
-        provider:provider_id(full_name, specialization)
+        patient:patient_id(*),
+        provider:provider_id(*),
+        examination_room:room_id(*),
+        attached_documents:appointment_documents_hc2024(
+          document:document_id(*)
+        )
       `)
-      .order('appointment_date', { ascending: true })
-
+    
     if (role === 'patient') {
       query = query.eq('patient_id', userId)
     } else if (role === 'doctor' || role === 'nurse') {
       query = query.eq('provider_id', userId)
     }
     
-    const { data, error } = await query
+    if (filters.room_id) {
+      query = query.eq('room_id', filters.room_id)
+    }
+    
+    if (filters.date_from && filters.date_to) {
+      query = query
+        .gte('appointment_date', filters.date_from)
+        .lte('appointment_date', filters.date_to)
+    }
+    
+    const { data, error } = await query.order('appointment_date', { ascending: true })
     
     if (error) throw error
     return data
@@ -270,16 +316,67 @@ export const dbHelpers = {
     return data
   },
 
-  async deleteAppointment(appointmentId) {
-    const { error } = await supabase
-      .from('appointments_hc2024')
-      .delete()
-      .eq('id', appointmentId)
+  // Patient Timeline and Logs
+  async getPatientTimeline(patientId) {
+    const [appointments, documents, tasks] = await Promise.all([
+      this.getAppointments(patientId, 'patient'),
+      this.getPatientDocuments(patientId),
+      this.getPatientTasks(patientId)
+    ])
     
-    if (error) throw error
+    const timeline = [
+      ...appointments.map(apt => ({
+        ...apt,
+        type: 'appointment',
+        timestamp: apt.appointment_date,
+        title: `Appointment: ${apt.title}`
+      })),
+      ...documents.map(doc => ({
+        ...doc,
+        type: 'document',
+        timestamp: doc.created_at,
+        title: `Document: ${doc.title}`
+      })),
+      ...tasks.map(task => ({
+        ...task,
+        type: 'task',
+        timestamp: task.created_at,
+        title: `Task: ${task.title}`
+      }))
+    ].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+    
+    return timeline
   },
 
-  // Advertisement Packages
+  // Enhanced Tasks with Patient linking
+  async getPatientTasks(patientId) {
+    const { data, error } = await supabase
+      .from('tasks_hc2024')
+      .select(`
+        *,
+        patient:patient_id(*),
+        assigned_to_user:assigned_to(*),
+        assigned_by_user:assigned_by(*)
+      `)
+      .eq('patient_id', patientId)
+      .order('created_at', { ascending: false })
+    
+    if (error) throw error
+    return data
+  },
+
+  async createTask(taskData) {
+    const { data, error } = await supabase
+      .from('tasks_hc2024')
+      .insert([taskData])
+      .select()
+      .single()
+    
+    if (error) throw error
+    return data
+  },
+
+  // Advertisement Packages with Stripe integration
   async getAdPackages() {
     const { data, error } = await supabase
       .from('ad_packages_hc2024')
@@ -302,57 +399,18 @@ export const dbHelpers = {
     return data
   },
 
-  async updateAdPackage(packageId, updates) {
-    const { data, error } = await supabase
-      .from('ad_packages_hc2024')
-      .update(updates)
-      .eq('id', packageId)
-      .select()
-      .single()
-    
-    if (error) throw error
-    return data
-  },
-
-  // Advertisements
+  // Advertisement Management with Priority System
   async getActiveAdvertisements() {
     const { data, error } = await supabase
       .from('advertisements_hc2024')
       .select(`
         *,
-        sponsor:sponsor_id(full_name)
+        sponsor:sponsor_id(full_name),
+        package:package_id(*)
       `)
       .eq('status', 'active')
       .gte('end_date', new Date().toISOString())
-      .order('created_at', { ascending: false })
-    
-    if (error) throw error
-    return data
-  },
-
-  async getSponsorAdvertisements(sponsorId) {
-    const { data, error } = await supabase
-      .from('advertisements_hc2024')
-      .select(`
-        *,
-        package:package_id(name, duration_months, price_euros)
-      `)
-      .eq('sponsor_id', sponsorId)
-      .order('created_at', { ascending: false })
-    
-    if (error) throw error
-    return data
-  },
-
-  async getAllAdvertisements() {
-    const { data, error } = await supabase
-      .from('advertisements_hc2024')
-      .select(`
-        *,
-        sponsor:sponsor_id(full_name, email),
-        package:package_id(name, duration_months)
-      `)
-      .order('created_at', { ascending: false })
+      .order('priority_level', { ascending: false })
     
     if (error) throw error
     return data
@@ -369,11 +427,44 @@ export const dbHelpers = {
     return data
   },
 
-  async updateAdvertisement(adId, updates) {
+  // System Settings Management
+  async getSystemSettings() {
     const { data, error } = await supabase
-      .from('advertisements_hc2024')
+      .from('system_settings_hc2024')
+      .select('*')
+      .single()
+    
+    if (error) throw error
+    return data
+  },
+
+  async updateSystemSettings(settings) {
+    const { data, error } = await supabase
+      .from('system_settings_hc2024')
+      .upsert([settings])
+      .select()
+      .single()
+    
+    if (error) throw error
+    return data
+  },
+
+  // Custom Fields Management
+  async getCustomFields() {
+    const { data, error } = await supabase
+      .from('custom_fields_hc2024')
+      .select('*')
+      .order('role', 'field_order')
+    
+    if (error) throw error
+    return data
+  },
+
+  async updateCustomField(fieldId, updates) {
+    const { data, error } = await supabase
+      .from('custom_fields_hc2024')
       .update(updates)
-      .eq('id', adId)
+      .eq('id', fieldId)
       .select()
       .single()
     
@@ -381,20 +472,22 @@ export const dbHelpers = {
     return data
   },
 
-  async deleteAdvertisement(adId) {
-    const { error } = await supabase
-      .from('advertisements_hc2024')
-      .delete()
-      .eq('id', adId)
+  // Doctor Specializations Management
+  async getSpecializations() {
+    const { data, error } = await supabase
+      .from('specializations_hc2024')
+      .select('*')
+      .eq('is_active', true)
+      .order('name')
     
     if (error) throw error
+    return data
   },
 
-  // Payments
-  async createPayment(paymentData) {
+  async createSpecialization(specializationData) {
     const { data, error } = await supabase
-      .from('payments_hc2024')
-      .insert([paymentData])
+      .from('specializations_hc2024')
+      .insert([specializationData])
       .select()
       .single()
     
@@ -402,77 +495,34 @@ export const dbHelpers = {
     return data
   },
 
-  async updatePayment(paymentId, updates) {
-    const { data, error } = await supabase
-      .from('payments_hc2024')
-      .update(updates)
-      .eq('id', paymentId)
-      .select()
-      .single()
-    
-    if (error) throw error
-    return data
-  },
-
-  async getUserPayments(userId) {
-    const { data, error } = await supabase
-      .from('payments_hc2024')
-      .select(`
-        *,
-        package:package_id(name, duration_months)
-      `)
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-    
-    if (error) throw error
-    return data
-  },
-
-  // Analytics
-  async trackAdImpression(adId, userId = null) {
-    const { error } = await supabase
-      .from('advertisement_impressions_hc2024')
-      .insert([{
-        advertisement_id: adId,
-        user_id: userId
-      }])
-    
-    if (error) console.error('Error tracking impression:', error)
-  },
-
-  async trackAdClick(adId, userId = null) {
-    const { error } = await supabase
-      .from('advertisement_clicks_hc2024')
-      .insert([{
-        advertisement_id: adId,
-        user_id: userId
-      }])
-    
-    if (error) console.error('Error tracking click:', error)
-    
-    // Also increment the click counter
-    await this.updateAdvertisement(adId, {
-      total_clicks: supabase.rpc('increment', { field: 'total_clicks' })
-    })
-  },
-
-  // Admin Dashboard Stats
-  async getAdminStats() {
-    const [users, activeAds, totalRevenue, pendingTasks] = await Promise.all([
-      supabase.from('user_profiles_hc2024').select('id', { count: 'exact' }),
-      supabase.from('advertisements_hc2024').select('id', { count: 'exact' }).eq('status', 'active'),
-      supabase.from('payments_hc2024').select('amount_euros').eq('status', 'succeeded'),
-      supabase.from('tasks_hc2024').select('id', { count: 'exact' }).eq('status', 'pending')
-    ])
-
-    const revenue = totalRevenue.data?.reduce((sum, payment) => sum + payment.amount_euros, 0) || 0
-
-    return {
-      totalUsers: users.count || 0,
-      activeAds: activeAds.count || 0,
-      totalRevenue: revenue,
-      pendingTasks: pendingTasks.count || 0
+  // QR Code Management
+  async generateQRCode(type, entityId, data) {
+    const qrData = {
+      type,
+      entity_id: entityId,
+      data: JSON.stringify(data),
+      created_at: new Date().toISOString()
     }
+    
+    const { data: result, error } = await supabase
+      .from('qr_codes_hc2024')
+      .insert([qrData])
+      .select()
+      .single()
+    
+    if (error) throw error
+    return result
+  },
+
+  async getQRCodeData(qrId) {
+    const { data, error } = await supabase
+      .from('qr_codes_hc2024')
+      .select('*')
+      .eq('id', qrId)
+      .single()
+    
+    if (error) throw error
+    return data
   }
 }
 

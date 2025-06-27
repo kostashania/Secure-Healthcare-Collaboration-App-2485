@@ -4,7 +4,11 @@ import { useAuth } from '../../contexts/AuthContext'
 import SafeIcon from '../../common/SafeIcon'
 import * as FiIcons from 'react-icons/fi'
 
-const { FiHome, FiUsers, FiFileText, FiCalendar, FiCheckSquare, FiSettings, FiEye, FiDollarSign, FiShield, FiBarChart } = FiIcons
+const { 
+  FiHome, FiUsers, FiFileText, FiCalendar, FiCheckSquare, FiSettings, 
+  FiEye, FiDollarSign, FiShield, FiBarChart, FiUserCheck, FiFolder,
+  FiClipboard, FiTool
+} = FiIcons
 
 const Navigation = ({ activeTab, setActiveTab }) => {
   const { profile } = useAuth()
@@ -18,27 +22,41 @@ const Navigation = ({ activeTab, setActiveTab }) => {
       case 'patient':
         return [
           ...baseItems,
-          { id: 'team', label: 'My Team', icon: FiUsers },
+          { id: 'connections', label: 'My Providers', icon: FiUsers },
           { id: 'documents', label: 'Documents', icon: FiFileText },
           { id: 'appointments', label: 'Appointments', icon: FiCalendar },
-          { id: 'tasks', label: 'Tasks', icon: FiCheckSquare }
+          { id: 'tasks', label: 'Tasks', icon: FiCheckSquare },
+          { id: 'requests', label: 'Connection Requests', icon: FiUserCheck }
         ]
       case 'doctor':
         return [
           ...baseItems,
-          { id: 'patients', label: 'Patients', icon: FiUsers },
+          { id: 'patients', label: 'My Patients', icon: FiUsers },
           { id: 'appointments', label: 'Appointments', icon: FiCalendar },
           { id: 'tasks', label: 'Tasks', icon: FiCheckSquare },
           { id: 'documents', label: 'Documents', icon: FiFileText },
-          { id: 'team', label: 'Team', icon: FiUsers }
+          { id: 'rooms', label: 'Exam Rooms', icon: FiClipboard },
+          { id: 'requests', label: 'Connection Requests', icon: FiUserCheck }
         ]
       case 'nurse':
         return [
           ...baseItems,
-          { id: 'patients', label: 'Patients', icon: FiUsers },
+          { id: 'patients', label: 'My Patients', icon: FiUsers },
           { id: 'tasks', label: 'Tasks', icon: FiCheckSquare },
+          { id: 'appointments', label: 'Appointments', icon: FiCalendar },
           { id: 'documents', label: 'Documents', icon: FiFileText },
-          { id: 'team', label: 'Team', icon: FiUsers }
+          { id: 'requests', label: 'Connection Requests', icon: FiUserCheck }
+        ]
+      case 'office_manager':
+        return [
+          ...baseItems,
+          { id: 'patients', label: 'Patients', icon: FiUsers },
+          { id: 'appointments', label: 'Appointments', icon: FiCalendar },
+          { id: 'documents', label: 'Documents', icon: FiFileText },
+          { id: 'tasks', label: 'Tasks', icon: FiCheckSquare },
+          { id: 'rooms', label: 'Exam Rooms', icon: FiClipboard },
+          { id: 'requests', label: 'Connection Requests', icon: FiUserCheck },
+          { id: 'reports', label: 'Reports', icon: FiBarChart }
         ]
       case 'admin':
         return [
@@ -46,6 +64,9 @@ const Navigation = ({ activeTab, setActiveTab }) => {
           { id: 'users', label: 'Users', icon: FiUsers },
           { id: 'advertisements', label: 'Advertisements', icon: FiEye },
           { id: 'analytics', label: 'Analytics', icon: FiBarChart },
+          { id: 'document-types', label: 'Document Types', icon: FiFolder },
+          { id: 'rooms', label: 'Exam Rooms', icon: FiClipboard },
+          { id: 'custom-fields', label: 'Custom Fields', icon: FiTool },
           { id: 'settings', label: 'Settings', icon: FiSettings }
         ]
       case 'sponsor':
@@ -70,6 +91,8 @@ const Navigation = ({ activeTab, setActiveTab }) => {
         return 'purple'
       case 'admin':
         return 'red'
+      case 'office_manager':
+        return 'orange'
       case 'sponsor':
         return 'yellow'
       default:
