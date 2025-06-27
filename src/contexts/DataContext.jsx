@@ -12,7 +12,7 @@ export const useData = () => {
   return context
 }
 
-// Enhanced demo data with new features
+// Enhanced demo data with all new features
 const INITIAL_DEMO_DATA = {
   users: [
     {
@@ -112,12 +112,12 @@ const INITIAL_DEMO_DATA = {
 
   // Document types (manageable by admin)
   documentTypes: [
-    { id: 'lab-results', name: 'Lab Results', icon: 'FiActivity', color: 'blue' },
-    { id: 'prescription', name: 'Prescription', icon: 'FiFileText', color: 'green' },
-    { id: 'medical-scan', name: 'Medical Scan', icon: 'FiCamera', color: 'purple' },
-    { id: 'medical-report', name: 'Medical Report', icon: 'FiFile', color: 'orange' },
-    { id: 'insurance', name: 'Insurance', icon: 'FiShield', color: 'indigo' },
-    { id: 'other', name: 'Other', icon: 'FiFolder', color: 'gray' }
+    { id: 'dt-lab', name: 'Lab Results', description: 'Laboratory test results', color: '#3b82f6', is_active: true },
+    { id: 'dt-prescription', name: 'Prescription', description: 'Medical prescriptions', color: '#22c55e', is_active: true },
+    { id: 'dt-scan', name: 'Medical Scan', description: 'X-rays, MRI, CT scans', color: '#8b5cf6', is_active: true },
+    { id: 'dt-report', name: 'Medical Report', description: 'Doctor reports', color: '#f59e0b', is_active: true },
+    { id: 'dt-insurance', name: 'Insurance', description: 'Insurance documents', color: '#6366f1', is_active: true },
+    { id: 'dt-other', name: 'Other', description: 'Other documents', color: '#6b7280', is_active: true }
   ],
 
   // Examination rooms
@@ -125,54 +125,24 @@ const INITIAL_DEMO_DATA = {
     { id: 'room-1', name: 'Room 101', description: 'General Consultation Room', is_active: true },
     { id: 'room-2', name: 'Room 102', description: 'Cardiology Room', is_active: true },
     { id: 'room-3', name: 'Room 103', description: 'Emergency Room', is_active: true },
-    { id: 'room-4', name: 'Lab Room', description: 'Laboratory Testing', is_active: true }
+    { id: 'room-4', name: 'Lab Room', description: 'Laboratory Testing', is_active: true },
+    { id: 'room-5', name: 'Surgery Room A', description: 'Main Surgery Room', is_active: true },
+    { id: 'room-6', name: 'Therapy Room', description: 'Physical Therapy Room', is_active: true }
   ],
-
-  // Custom field labels per role
-  customFieldLabels: {
-    patient: {
-      field_1: 'Insurance Information',
-      field_2: 'Emergency Contact',
-      field_3: 'Blood Type'
-    },
-    doctor: {
-      field_1: 'Position',
-      field_2: 'Years of Experience',
-      field_3: 'Specialty Area'
-    },
-    nurse: {
-      field_1: 'Certification Level',
-      field_2: 'Department',
-      field_3: 'Years of Experience'
-    },
-    admin: {
-      field_1: 'Department',
-      field_2: 'Access Level',
-      field_3: 'Position Level'
-    },
-    office_manager: {
-      field_1: 'Department',
-      field_2: 'Responsibilities',
-      field_3: 'Experience Level'
-    },
-    sponsor: {
-      field_1: 'Business Type',
-      field_2: 'Market Focus',
-      field_3: 'Partnership Level'
-    }
-  },
 
   // Connection requests
   connectionRequests: [
     {
       id: 'req-1',
-      requester_id: 'patient-1',
-      target_id: 'doctor-1',
-      requester_type: 'patient',
-      target_type: 'doctor',
+      requester_id: 'patient-2',
+      recipient_id: 'doctor-1',
+      requester_role: 'patient',
+      recipient_role: 'doctor',
       status: 'pending',
-      requested_at: new Date().toISOString(),
-      message: 'Would like to have you as my cardiologist'
+      message: 'Would like to have you as my cardiologist',
+      created_at: new Date().toISOString(),
+      requester: { id: 'patient-2', full_name: 'Emma Wilson', role: 'patient', email: 'emma@demo.com' },
+      recipient: { id: 'doctor-1', full_name: 'Dr. Sarah Johnson', role: 'doctor', email: 'doctor@demo.com' }
     }
   ],
 
@@ -180,21 +150,23 @@ const INITIAL_DEMO_DATA = {
   userConnections: [
     {
       id: 'conn-1',
-      patient_id: 'patient-1',
-      provider_id: 'doctor-1',
-      provider_type: 'doctor',
-      role: 'primary_doctor',
-      connected_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-      is_active: true
+      user1_id: 'patient-1',
+      user2_id: 'doctor-1',
+      connection_type: 'patient_doctor',
+      is_active: true,
+      created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+      user1: { id: 'patient-1', full_name: 'John Smith', role: 'patient', email: 'patient@demo.com' },
+      user2: { id: 'doctor-1', full_name: 'Dr. Sarah Johnson', role: 'doctor', email: 'doctor@demo.com' }
     },
     {
       id: 'conn-2',
-      patient_id: 'patient-1',
-      provider_id: 'nurse-1',
-      provider_type: 'nurse',
-      role: 'assigned_nurse',
-      connected_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-      is_active: true
+      user1_id: 'patient-1',
+      user2_id: 'nurse-1',
+      connection_type: 'patient_nurse',
+      is_active: true,
+      created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+      user1: { id: 'patient-1', full_name: 'John Smith', role: 'patient', email: 'patient@demo.com' },
+      user2: { id: 'nurse-1', full_name: 'Maria Rodriguez', role: 'nurse', email: 'nurse@demo.com' }
     }
   ],
 
@@ -204,33 +176,41 @@ const INITIAL_DEMO_DATA = {
       id: 'doc-1',
       title: 'Blood Test Results - Complete Panel',
       description: 'Complete blood count and chemistry panel results',
-      type: 'lab-results',
+      type_id: 'dt-lab',
       patient_id: 'patient-1',
       uploaded_by: 'doctor-1',
-      url: 'https://example.com/bloodtest.pdf',
+      file_url: 'https://example.com/bloodtest.pdf',
       file_name: 'blood_test_results.pdf',
       file_size: 245760,
-      tags: ['blood work', 'routine', 'annual checkup'],
-      uploaded_at: new Date(Date.now() - 86400000).toISOString(),
-      created_at: new Date(Date.now() - 86400000).toISOString()
+      mime_type: 'application/pdf',
+      created_at: new Date(Date.now() - 86400000).toISOString(),
+      document_type: { id: 'dt-lab', name: 'Lab Results', color: '#3b82f6' },
+      uploaded_by_user: { full_name: 'Dr. Sarah Johnson' }
     },
     {
       id: 'doc-2',
       title: 'Lisinopril Prescription',
       description: 'Blood pressure medication prescription - 10mg daily',
-      type: 'prescription',
+      type_id: 'dt-prescription',
       patient_id: 'patient-1',
       uploaded_by: 'doctor-1',
-      url: 'https://example.com/prescription.pdf',
+      file_url: 'https://example.com/prescription.pdf',
       file_name: 'lisinopril_prescription.pdf',
       file_size: 156432,
-      tags: ['blood pressure', 'medication', 'daily'],
-      uploaded_at: new Date(Date.now() - 172800000).toISOString(),
-      created_at: new Date(Date.now() - 172800000).toISOString()
+      mime_type: 'application/pdf',
+      created_at: new Date(Date.now() - 172800000).toISOString(),
+      document_type: { id: 'dt-prescription', name: 'Prescription', color: '#22c55e' },
+      uploaded_by_user: { full_name: 'Dr. Sarah Johnson' }
     }
   ],
 
-  // Enhanced tasks
+  // Document tags
+  documentTags: {
+    'doc-1': ['blood work', 'routine', 'annual checkup'],
+    'doc-2': ['blood pressure', 'medication', 'daily']
+  },
+
+  // Enhanced tasks with document attachments
   tasks: [
     {
       id: 'task-1',
@@ -242,7 +222,11 @@ const INITIAL_DEMO_DATA = {
       status: 'pending',
       priority: 'high',
       due_date: new Date(Date.now() + 86400000).toISOString(),
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      patient: { id: 'patient-1', full_name: 'John Smith' },
+      assigned_to_user: { id: 'nurse-1', full_name: 'Maria Rodriguez' },
+      assigned_by_user: { id: 'doctor-1', full_name: 'Dr. Sarah Johnson' },
+      attached_documents: []
     },
     {
       id: 'task-2',
@@ -255,11 +239,15 @@ const INITIAL_DEMO_DATA = {
       priority: 'medium',
       due_date: new Date(Date.now() - 86400000).toISOString(),
       completed_at: new Date(Date.now() - 43200000).toISOString(),
-      created_at: new Date(Date.now() - 86400000).toISOString()
+      created_at: new Date(Date.now() - 86400000).toISOString(),
+      patient: { id: 'patient-1', full_name: 'John Smith' },
+      assigned_to_user: { id: 'nurse-1', full_name: 'Maria Rodriguez' },
+      assigned_by_user: { id: 'doctor-1', full_name: 'Dr. Sarah Johnson' },
+      attached_documents: []
     }
   ],
 
-  // Enhanced appointments with memo and QR codes
+  // Enhanced appointments with QR codes and room assignments
   appointments: [
     {
       id: 'apt-1',
@@ -267,14 +255,19 @@ const INITIAL_DEMO_DATA = {
       patient_id: 'patient-1',
       provider_id: 'doctor-1',
       room_id: 'room-2',
-      date: new Date(Date.now() + 172800000).toISOString(),
+      appointment_date: new Date(Date.now() + 172800000).toISOString(),
       duration: 30,
       type: 'consultation',
       status: 'scheduled',
+      location: '',
+      notes: '',
       memo: '',
-      attached_documents: [],
       qr_code: 'QR-APT-1-' + Date.now(),
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      patient: { id: 'patient-1', full_name: 'John Smith', role: 'patient' },
+      provider: { id: 'doctor-1', full_name: 'Dr. Sarah Johnson', role: 'doctor' },
+      examination_room: { id: 'room-2', name: 'Room 102', description: 'Cardiology Room' },
+      attached_documents: []
     },
     {
       id: 'apt-2',
@@ -282,25 +275,30 @@ const INITIAL_DEMO_DATA = {
       patient_id: 'patient-2',
       provider_id: 'doctor-1',
       room_id: 'room-1',
-      date: new Date(Date.now() + 604800000).toISOString(),
+      appointment_date: new Date(Date.now() + 604800000).toISOString(),
       duration: 45,
       type: 'routine',
       status: 'scheduled',
+      location: '',
+      notes: '',
       memo: '',
-      attached_documents: [],
       qr_code: 'QR-APT-2-' + Date.now(),
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      patient: { id: 'patient-2', full_name: 'Emma Wilson', role: 'patient' },
+      provider: { id: 'doctor-1', full_name: 'Dr. Sarah Johnson', role: 'doctor' },
+      examination_room: { id: 'room-1', name: 'Room 101', description: 'General Consultation Room' },
+      attached_documents: []
     }
   ],
 
-  // Enhanced advertisement packages with priority levels
+  // Advertisement packages
   adPackages: [
     {
       id: 'pkg-bronze',
       name: 'Bronze Package',
       description: 'Basic advertising for small practices',
       duration_months: 1,
-      price_euros: 1500, // €15.00
+      price_euros: 1500,
       priority: 'bronze',
       display_probability: 10,
       max_ads: 2,
@@ -313,7 +311,7 @@ const INITIAL_DEMO_DATA = {
       name: 'Silver Package',
       description: 'Enhanced visibility for growing practices',
       duration_months: 3,
-      price_euros: 4000, // €40.00
+      price_euros: 4000,
       priority: 'silver',
       display_probability: 25,
       max_ads: 5,
@@ -326,7 +324,7 @@ const INITIAL_DEMO_DATA = {
       name: 'Gold Package',
       description: 'Premium advertising with high visibility',
       duration_months: 6,
-      price_euros: 7500, // €75.00
+      price_euros: 7500,
       priority: 'gold',
       display_probability: 60,
       max_ads: 10,
@@ -339,7 +337,7 @@ const INITIAL_DEMO_DATA = {
       name: 'Platinum Package',
       description: 'Ultimate exposure for large medical centers',
       duration_months: 12,
-      price_euros: 12000, // €120.00
+      price_euros: 12000,
       priority: 'platinum',
       display_probability: 5,
       max_ads: 20,
@@ -349,16 +347,11 @@ const INITIAL_DEMO_DATA = {
     }
   ],
 
-  // Advertisement display settings
+  // Advertisement system settings
   adSettings: {
-    display_duration: 8, // seconds
+    display_duration: 8,
     rotation_enabled: true,
-    priority_weights: {
-      platinum: 5,
-      gold: 60,
-      silver: 25,
-      bronze: 10
-    }
+    priority_weights: { platinum: 5, gold: 60, silver: 25, bronze: 10 }
   },
 
   // Enhanced advertisements
@@ -374,7 +367,7 @@ const INITIAL_DEMO_DATA = {
       priority: 'gold',
       status: 'active',
       start_date: new Date(Date.now() - 86400000).toISOString(),
-      end_date: new Date(Date.now() + 15552000000).toISOString(), // 6 months
+      end_date: new Date(Date.now() + 15552000000).toISOString(),
       total_impressions: 2340,
       total_clicks: 156,
       created_at: new Date(Date.now() - 86400000).toISOString(),
@@ -396,16 +389,33 @@ const INITIAL_DEMO_DATA = {
       created_at: new Date(Date.now() - 86400000).toISOString(),
       package: { name: 'Gold Package', duration_months: 6 }
     }
-  ]
+  ],
+
+  // Custom field labels
+  customFieldLabels: {
+    patient: { field_1: 'Insurance Information', field_2: 'Emergency Contact', field_3: 'Blood Type' },
+    doctor: { field_1: 'Department', field_2: 'Years of Experience', field_3: 'Specialty Focus' },
+    nurse: { field_1: 'Unit Assignment', field_2: 'Shift Preference', field_3: 'Certifications' },
+    admin: { field_1: 'Department', field_2: 'Access Level', field_3: 'Responsibilities' },
+    office_manager: { field_1: 'Department', field_2: 'Experience Level', field_3: 'Primary Duties' },
+    sponsor: { field_1: 'Business Sector', field_2: 'Sponsor Type', field_3: 'Product Category' }
+  },
+
+  // Admin statistics
+  adminStats: {
+    totalUsers: 7,
+    activeAds: 1,
+    totalRevenue: 7500,
+    pendingTasks: 1
+  }
 }
 
 // Load data from localStorage or use initial data
 const loadDataFromStorage = () => {
   try {
-    const saved = localStorage.getItem('healthcare_app_data_v2')
+    const saved = localStorage.getItem('healthcare_app_data_v3')
     if (saved) {
       const parsedData = JSON.parse(saved)
-      // Merge with initial data to ensure new features are available
       return { ...INITIAL_DEMO_DATA, ...parsedData }
     }
   } catch (error) {
@@ -417,7 +427,7 @@ const loadDataFromStorage = () => {
 // Save data to localStorage
 const saveDataToStorage = (data) => {
   try {
-    localStorage.setItem('healthcare_app_data_v2', JSON.stringify(data))
+    localStorage.setItem('healthcare_app_data_v3', JSON.stringify(data))
   } catch (error) {
     console.error('Error saving data to storage:', error)
   }
@@ -433,52 +443,47 @@ export const DataProvider = ({ children }) => {
     saveDataToStorage(data)
   }, [data])
 
-  // Generate QR code for appointments
-  const generateQRCode = (appointmentId) => {
-    return `QR-APT-${appointmentId}-${Date.now()}`
-  }
-
   // Helper functions for user connections
   const getUserConnections = (userId) => {
-    return data.userConnections.filter(conn => 
-      (conn.patient_id === userId || conn.provider_id === userId) && conn.is_active
+    return data.userConnections.filter(conn =>
+      (conn.user1_id === userId || conn.user2_id === userId) && conn.is_active
     )
   }
 
   const getPatientProviders = (patientId) => {
-    const connections = data.userConnections.filter(conn => 
-      conn.patient_id === patientId && conn.is_active
+    const connections = data.userConnections.filter(conn =>
+      conn.user1_id === patientId && conn.is_active
     )
     return connections.map(conn => {
-      const provider = data.users.find(u => u.id === conn.provider_id)
+      const provider = data.users.find(u => u.id === conn.user2_id)
       return { ...conn, provider }
     })
   }
 
   const getProviderPatients = (providerId) => {
-    const connections = data.userConnections.filter(conn => 
-      conn.provider_id === providerId && conn.is_active
+    const connections = data.userConnections.filter(conn =>
+      conn.user2_id === providerId && conn.is_active
     )
     return connections.map(conn => {
-      const patient = data.users.find(u => u.id === conn.patient_id)
+      const patient = data.users.find(u => u.id === conn.user1_id)
       return { ...conn, patient }
     })
   }
 
   // Connection request management
-  const createConnectionRequest = async (targetId, targetType, message = '') => {
+  const createConnectionRequest = async (requestData) => {
     try {
       if (!profile) throw new Error('Not authenticated')
 
+      const requester = data.users.find(u => u.id === requestData.requester_id)
+      const recipient = data.users.find(u => u.id === requestData.recipient_id)
+
       const newRequest = {
         id: `req-${Date.now()}`,
-        requester_id: profile.id,
-        target_id: targetId,
-        requester_type: profile.role,
-        target_type: targetType,
-        status: 'pending',
-        requested_at: new Date().toISOString(),
-        message
+        ...requestData,
+        created_at: new Date().toISOString(),
+        requester,
+        recipient
       }
 
       setData(prev => ({
@@ -503,12 +508,13 @@ export const DataProvider = ({ children }) => {
       // Create connection
       const newConnection = {
         id: `conn-${Date.now()}`,
-        patient_id: request.requester_type === 'patient' ? request.requester_id : request.target_id,
-        provider_id: request.requester_type === 'patient' ? request.target_id : request.requester_id,
-        provider_type: request.requester_type === 'patient' ? request.target_type : request.requester_type,
-        role: request.target_type === 'doctor' ? 'assigned_doctor' : 'assigned_nurse',
-        connected_at: new Date().toISOString(),
-        is_active: true
+        user1_id: request.requester_role === 'patient' ? request.requester_id : request.recipient_id,
+        user2_id: request.requester_role === 'patient' ? request.recipient_id : request.requester_id,
+        connection_type: `${request.requester_role}_${request.recipient_role}`,
+        is_active: true,
+        created_at: new Date().toISOString(),
+        user1: request.requester_role === 'patient' ? request.requester : request.recipient,
+        user2: request.requester_role === 'patient' ? request.recipient : request.requester
       }
 
       setData(prev => ({
@@ -546,27 +552,50 @@ export const DataProvider = ({ children }) => {
     }
   }
 
+  const removeUserConnection = async (connectionId) => {
+    try {
+      setData(prev => ({
+        ...prev,
+        userConnections: prev.userConnections.map(conn =>
+          conn.id === connectionId ? { ...conn, is_active: false } : conn
+        )
+      }))
+
+      toast.success('Connection removed')
+      return { success: true }
+    } catch (error) {
+      console.error('Error removing connection:', error)
+      toast.error('Error removing connection')
+      return { success: false, error: error.message }
+    }
+  }
+
   // Document management with tags
-  const addDocument = ({ title, description, type, patientId, file, tags = [] }) => {
+  const addDocument = async ({ title, description, type_id, patient_id, file, uploaded_by, tags = [] }) => {
     try {
       const newDoc = {
         id: `doc-${Date.now()}`,
         title,
         description,
-        type,
-        patient_id: patientId || profile?.id,
-        uploaded_by: profile?.id,
-        url: file ? URL.createObjectURL(file) : 'https://example.com/document.pdf',
+        type_id,
+        patient_id: patient_id || profile?.id,
+        uploaded_by: uploaded_by || profile?.id,
+        file_url: file ? URL.createObjectURL(file) : 'https://example.com/document.pdf',
         file_name: file ? file.name : 'document.pdf',
         file_size: file ? file.size : 0,
-        tags: Array.isArray(tags) ? tags : [],
-        uploaded_at: new Date().toISOString(),
-        created_at: new Date().toISOString()
+        mime_type: file ? file.type : 'application/pdf',
+        created_at: new Date().toISOString(),
+        document_type: data.documentTypes.find(t => t.id === type_id),
+        uploaded_by_user: data.users.find(u => u.id === (uploaded_by || profile?.id))
       }
 
       setData(prev => ({
         ...prev,
-        documents: [newDoc, ...prev.documents]
+        documents: [newDoc, ...prev.documents],
+        documentTags: {
+          ...prev.documentTags,
+          [newDoc.id]: Array.isArray(tags) ? tags : []
+        }
       }))
 
       toast.success('Document uploaded successfully!')
@@ -578,39 +607,62 @@ export const DataProvider = ({ children }) => {
     }
   }
 
-  // Enhanced appointment management
-  const addAppointment = ({ title, patientId, date, time, duration, type, roomId, memo = '' }) => {
+  const deleteDocument = async (documentId) => {
     try {
-      const appointmentDateTime = new Date(`${date}T${time}`)
-      
-      // Check room availability if room is specified
-      if (roomId) {
-        const conflictingAppointment = data.appointments.find(apt => 
-          apt.room_id === roomId && 
-          apt.status === 'scheduled' &&
-          new Date(apt.date).toDateString() === appointmentDateTime.toDateString() &&
-          Math.abs(new Date(apt.date).getTime() - appointmentDateTime.getTime()) < (duration || 30) * 60000
+      setData(prev => ({
+        ...prev,
+        documents: prev.documents.filter(doc => doc.id !== documentId),
+        documentTags: Object.fromEntries(
+          Object.entries(prev.documentTags).filter(([id]) => id !== documentId)
         )
-        
-        if (conflictingAppointment) {
-          throw new Error('Room is already booked for this time slot')
+      }))
+
+      toast.success('Document deleted successfully!')
+      return { success: true }
+    } catch (error) {
+      console.error('Error deleting document:', error)
+      toast.error('Error deleting document')
+      return { success: false, error: error.message }
+    }
+  }
+
+  const createDocumentTag = async ({ document_id, tag, created_by }) => {
+    try {
+      setData(prev => ({
+        ...prev,
+        documentTags: {
+          ...prev.documentTags,
+          [document_id]: [...(prev.documentTags[document_id] || []), tag]
         }
-      }
+      }))
+
+      return { success: true }
+    } catch (error) {
+      console.error('Error creating document tag:', error)
+      return { success: false, error: error.message }
+    }
+  }
+
+  const getDocumentTags = async (documentId) => {
+    return (data.documentTags[documentId] || []).map(tag => ({ tag }))
+  }
+
+  // Enhanced appointment management
+  const addAppointment = async (appointmentData) => {
+    try {
+      const patient = data.users.find(u => u.id === appointmentData.patient_id)
+      const provider = data.users.find(u => u.id === appointmentData.provider_id)
+      const room = data.examinationRooms.find(r => r.id === appointmentData.room_id)
 
       const newAppointment = {
         id: `apt-${Date.now()}`,
-        title,
-        patient_id: patientId,
-        provider_id: profile?.role === 'doctor' ? profile.id : 'doctor-1',
-        room_id: roomId,
-        date: appointmentDateTime.toISOString(),
-        duration: duration || 30,
-        type: type || 'consultation',
-        status: 'scheduled',
-        memo,
-        attached_documents: [],
-        qr_code: generateQRCode(`apt-${Date.now()}`),
-        created_at: new Date().toISOString()
+        ...appointmentData,
+        qr_code: `QR-APT-${Date.now()}`,
+        created_at: new Date().toISOString(),
+        patient,
+        provider,
+        examination_room: room,
+        attached_documents: []
       }
 
       setData(prev => ({
@@ -622,12 +674,11 @@ export const DataProvider = ({ children }) => {
       return { success: true, appointment: newAppointment }
     } catch (error) {
       console.error('Error creating appointment:', error)
-      toast.error(error.message)
+      toast.error('Error creating appointment')
       return { success: false, error: error.message }
     }
   }
 
-  // Update appointment with memo and documents
   const updateAppointment = async (appointmentId, updates) => {
     try {
       setData(prev => ({
@@ -646,160 +697,37 @@ export const DataProvider = ({ children }) => {
     }
   }
 
-  // Room management
-  const getRoomSchedule = (roomId, date) => {
-    const targetDate = new Date(date).toDateString()
-    return data.appointments.filter(apt => 
-      apt.room_id === roomId && 
-      apt.status === 'scheduled' &&
-      new Date(apt.date).toDateString() === targetDate
-    )
-  }
-
-  // Admin functions for managing document types
-  const addDocumentType = async (typeData) => {
-    try {
-      const newType = {
-        id: `type-${Date.now()}`,
-        ...typeData,
-        created_at: new Date().toISOString()
-      }
-
-      setData(prev => ({
-        ...prev,
-        documentTypes: [...prev.documentTypes, newType]
-      }))
-
-      toast.success('Document type added successfully!')
-      return { success: true, type: newType }
-    } catch (error) {
-      console.error('Error adding document type:', error)
-      toast.error('Error adding document type')
-      return { success: false, error: error.message }
-    }
-  }
-
-  const updateDocumentType = async (typeId, updates) => {
+  const deleteAppointment = async (appointmentId) => {
     try {
       setData(prev => ({
         ...prev,
-        documentTypes: prev.documentTypes.map(type =>
-          type.id === typeId ? { ...type, ...updates } : type
-        )
+        appointments: prev.appointments.filter(apt => apt.id !== appointmentId)
       }))
 
-      toast.success('Document type updated successfully!')
+      toast.success('Appointment deleted successfully!')
       return { success: true }
     } catch (error) {
-      console.error('Error updating document type:', error)
-      toast.error('Error updating document type')
+      console.error('Error deleting appointment:', error)
+      toast.error('Error deleting appointment')
       return { success: false, error: error.message }
     }
   }
 
-  const deleteDocumentType = async (typeId) => {
+  // Task management with document attachments
+  const addTask = async (taskData) => {
     try {
-      setData(prev => ({
-        ...prev,
-        documentTypes: prev.documentTypes.filter(type => type.id !== typeId)
-      }))
+      const patient = data.users.find(u => u.id === taskData.patient_id)
+      const assignedTo = data.users.find(u => u.id === taskData.assigned_to)
+      const assignedBy = data.users.find(u => u.id === taskData.assigned_by)
 
-      toast.success('Document type deleted successfully!')
-      return { success: true }
-    } catch (error) {
-      console.error('Error deleting document type:', error)
-      toast.error('Error deleting document type')
-      return { success: false, error: error.message }
-    }
-  }
-
-  // Update custom field labels
-  const updateCustomFieldLabels = async (role, labels) => {
-    try {
-      setData(prev => ({
-        ...prev,
-        customFieldLabels: {
-          ...prev.customFieldLabels,
-          [role]: labels
-        }
-      }))
-
-      toast.success('Custom field labels updated successfully!')
-      return { success: true }
-    } catch (error) {
-      console.error('Error updating custom field labels:', error)
-      toast.error('Error updating custom field labels')
-      return { success: false, error: error.message }
-    }
-  }
-
-  // Advertisement settings management
-  const updateAdSettings = async (settings) => {
-    try {
-      setData(prev => ({
-        ...prev,
-        adSettings: { ...prev.adSettings, ...settings }
-      }))
-
-      toast.success('Advertisement settings updated successfully!')
-      return { success: true }
-    } catch (error) {
-      console.error('Error updating ad settings:', error)
-      toast.error('Error updating ad settings')
-      return { success: false, error: error.message }
-    }
-  }
-
-  // Get all existing helper functions (keeping them for backward compatibility)
-  const getUserTasks = () => {
-    if (!profile) return []
-    return data.tasks.filter(task => task.assigned_to === profile.id)
-  }
-
-  const getPatientTasks = (patientId) => {
-    return data.tasks.filter(task => task.patient_id === patientId)
-  }
-
-  const getPatientDocuments = (patientId) => {
-    return data.documents.filter(doc => doc.patient_id === patientId)
-  }
-
-  const getUserAppointments = (userId, role) => {
-    if (role === 'patient') {
-      return data.appointments.filter(apt => apt.patient_id === userId)
-    } else {
-      return data.appointments.filter(apt => apt.provider_id === userId)
-    }
-  }
-
-  const getPatientAppointments = (patientId) => {
-    return data.appointments.filter(apt => apt.patient_id === patientId)
-  }
-
-  const getPatientTeam = (patientId) => {
-    const connections = data.userConnections.filter(
-      conn => conn.patient_id === patientId && conn.is_active
-    )
-    return connections.map(conn => {
-      const provider = data.users.find(user => user.id === conn.provider_id)
-      return { ...conn, provider }
-    })
-  }
-
-  // Continue with other existing functions...
-  const addTask = ({ title, description, patientId, assignedTo, dueDate, priority }) => {
-    try {
       const newTask = {
         id: `task-${Date.now()}`,
-        title,
-        description,
-        patient_id: patientId,
-        assigned_to: assignedTo || profile?.id,
-        assigned_by: profile?.id,
-        status: 'pending',
-        priority: priority || 'medium',
-        due_date: dueDate,
-        created_at: new Date().toISOString()
+        ...taskData,
+        created_at: new Date().toISOString(),
+        patient,
+        assigned_to_user: assignedTo,
+        assigned_by_user: assignedBy,
+        attached_documents: []
       }
 
       setData(prev => ({
@@ -834,12 +762,261 @@ export const DataProvider = ({ children }) => {
     }
   }
 
+  const attachDocumentToTask = async (taskId, documentId) => {
+    try {
+      setData(prev => ({
+        ...prev,
+        tasks: prev.tasks.map(task =>
+          task.id === taskId
+            ? {
+                ...task,
+                attached_documents: [
+                  ...task.attached_documents,
+                  data.documents.find(doc => doc.id === documentId)
+                ]
+              }
+            : task
+        )
+      }))
+
+      toast.success('Document attached to task!')
+      return { success: true }
+    } catch (error) {
+      console.error('Error attaching document to task:', error)
+      toast.error('Error attaching document')
+      return { success: false, error: error.message }
+    }
+  }
+
+  // Admin functions
+  const createUser = async (userData) => {
+    try {
+      const newUser = {
+        id: `user-${Date.now()}`,
+        ...userData,
+        is_active: true,
+        created_at: new Date().toISOString()
+      }
+
+      setData(prev => ({
+        ...prev,
+        users: [newUser, ...prev.users]
+      }))
+
+      toast.success('User created successfully!')
+      return { success: true, user: newUser }
+    } catch (error) {
+      console.error('Error creating user:', error)
+      toast.error('Error creating user')
+      return { success: false, error: error.message }
+    }
+  }
+
+  const updateUser = async (userId, updates) => {
+    try {
+      setData(prev => ({
+        ...prev,
+        users: prev.users.map(user =>
+          user.id === userId ? { ...user, ...updates } : user
+        )
+      }))
+
+      toast.success('User updated successfully!')
+      return { success: true }
+    } catch (error) {
+      console.error('Error updating user:', error)
+      toast.error('Error updating user')
+      return { success: false, error: error.message }
+    }
+  }
+
+  const deleteUser = async (userId) => {
+    try {
+      setData(prev => ({
+        ...prev,
+        users: prev.users.filter(user => user.id !== userId)
+      }))
+
+      toast.success('User deleted successfully!')
+      return { success: true }
+    } catch (error) {
+      console.error('Error deleting user:', error)
+      toast.error('Error deleting user')
+      return { success: false, error: error.message }
+    }
+  }
+
+  // Advertisement management
+  const createAdvertisement = async (adData) => {
+    try {
+      const sponsor = data.users.find(u => u.id === adData.sponsor_id)
+      const adPackage = data.adPackages.find(p => p.id === adData.package_id)
+
+      const newAd = {
+        id: `ad-${Date.now()}`,
+        ...adData,
+        status: 'pending',
+        total_impressions: 0,
+        total_clicks: 0,
+        created_at: new Date().toISOString(),
+        sponsor,
+        package: adPackage
+      }
+
+      setData(prev => ({
+        ...prev,
+        advertisements: [newAd, ...prev.advertisements]
+      }))
+
+      toast.success('Advertisement created successfully!')
+      return { success: true, advertisement: newAd }
+    } catch (error) {
+      console.error('Error creating advertisement:', error)
+      toast.error('Error creating advertisement')
+      return { success: false, error: error.message }
+    }
+  }
+
+  const updateAdvertisement = async (adId, updates) => {
+    try {
+      setData(prev => ({
+        ...prev,
+        advertisements: prev.advertisements.map(ad =>
+          ad.id === adId ? { ...ad, ...updates } : ad
+        )
+      }))
+
+      toast.success('Advertisement updated successfully!')
+      return { success: true }
+    } catch (error) {
+      console.error('Error updating advertisement:', error)
+      toast.error('Error updating advertisement')
+      return { success: false, error: error.message }
+    }
+  }
+
+  const deleteAdvertisement = async (adId) => {
+    try {
+      setData(prev => ({
+        ...prev,
+        advertisements: prev.advertisements.filter(ad => ad.id !== adId)
+      }))
+
+      toast.success('Advertisement deleted successfully!')
+      return { success: true }
+    } catch (error) {
+      console.error('Error deleting advertisement:', error)
+      toast.error('Error deleting advertisement')
+      return { success: false, error: error.message }
+    }
+  }
+
+  // Payment management
+  const createPayment = async (paymentData) => {
+    try {
+      const newPayment = {
+        id: `pay-${Date.now()}`,
+        ...paymentData,
+        created_at: new Date().toISOString()
+      }
+
+      setData(prev => ({
+        ...prev,
+        payments: [newPayment, ...prev.payments]
+      }))
+
+      toast.success('Payment recorded successfully!')
+      return { success: true, payment: newPayment }
+    } catch (error) {
+      console.error('Error creating payment:', error)
+      toast.error('Error recording payment')
+      return { success: false, error: error.message }
+    }
+  }
+
+  // QR Code management
+  const createQRCode = async (type, entityId, qrData) => {
+    try {
+      const qrCode = {
+        id: `qr-${Date.now()}`,
+        type,
+        entity_id: entityId,
+        data: qrData,
+        created_at: new Date().toISOString()
+      }
+
+      console.log('QR Code created:', qrCode)
+      return { success: true, qrCode }
+    } catch (error) {
+      console.error('Error creating QR code:', error)
+      return { success: false, error: error.message }
+    }
+  }
+
+  // Helper functions for getting filtered data
+  const getUserTasks = () => {
+    if (!profile) return []
+    return data.tasks.filter(task => task.assigned_to === profile.id)
+  }
+
+  const getPatientTasks = (patientId) => {
+    return data.tasks.filter(task => task.patient_id === patientId)
+  }
+
+  const getPatientDocuments = (patientId) => {
+    return data.documents.filter(doc => doc.patient_id === patientId)
+  }
+
+  const getUserAppointments = (userId, role) => {
+    if (role === 'patient') {
+      return data.appointments.filter(apt => apt.patient_id === userId)
+    } else if (role === 'doctor' || role === 'nurse') {
+      return data.appointments.filter(apt => apt.provider_id === userId)
+    } else if (role === 'office_manager' || role === 'admin') {
+      return data.appointments
+    }
+    return []
+  }
+
+  const getPatientAppointments = (patientId) => {
+    return data.appointments.filter(apt => apt.patient_id === patientId)
+  }
+
+  const getPatientTeam = (patientId) => {
+    const connections = data.userConnections.filter(
+      conn => conn.user1_id === patientId && conn.is_active
+    )
+    return connections.map(conn => {
+      const provider = data.users.find(user => user.id === conn.user2_id)
+      return { ...conn, provider }
+    })
+  }
+
+  const trackAdImpression = async (adId) => {
+    setData(prev => ({
+      ...prev,
+      advertisements: prev.advertisements.map(ad =>
+        ad.id === adId ? { ...ad, total_impressions: (ad.total_impressions || 0) + 1 } : ad
+      )
+    }))
+  }
+
+  const trackAdClick = async (adId) => {
+    setData(prev => ({
+      ...prev,
+      advertisements: prev.advertisements.map(ad =>
+        ad.id === adId ? { ...ad, total_clicks: (ad.total_clicks || 0) + 1 } : ad
+      )
+    }))
+  }
+
   const value = {
     // Data
     users: data.users,
     patients: data.users.filter(u => u.role === 'patient'),
     documents: data.documents,
     documentTypes: data.documentTypes,
+    documentTags: data.documentTags,
     tasks: data.tasks,
     appointments: data.appointments,
     advertisements: data.advertisements,
@@ -850,6 +1027,7 @@ export const DataProvider = ({ children }) => {
     customFieldLabels: data.customFieldLabels,
     connectionRequests: data.connectionRequests,
     userConnections: data.userConnections,
+    adminStats: data.adminStats,
     loading,
 
     // Helper functions
@@ -862,52 +1040,48 @@ export const DataProvider = ({ children }) => {
     getUserConnections,
     getPatientProviders,
     getProviderPatients,
-    getRoomSchedule,
 
     // Connection management
     createConnectionRequest,
     approveConnectionRequest,
     rejectConnectionRequest,
+    removeUserConnection,
 
     // Document Management
     addDocument,
+    deleteDocument,
+    createDocumentTag,
+    getDocumentTags,
 
-    // Task Management  
+    // Task Management
     addTask,
     updateTask,
+    attachDocumentToTask,
 
     // Appointment Management
     addAppointment,
     updateAppointment,
+    deleteAppointment,
 
-    // Room Management
-    getRoomSchedule,
+    // User Management
+    createUser,
+    updateUser,
+    deleteUser,
 
-    // Admin Functions
-    addDocumentType,
-    updateDocumentType,
-    deleteDocumentType,
-    updateCustomFieldLabels,
-    updateAdSettings,
+    // Advertisement Management
+    createAdvertisement,
+    updateAdvertisement,
+    deleteAdvertisement,
+
+    // Payment Management
+    createPayment,
+
+    // QR Code Management
+    createQRCode,
 
     // Analytics
-    trackAdImpression: async (adId) => {
-      setData(prev => ({
-        ...prev,
-        advertisements: prev.advertisements.map(ad =>
-          ad.id === adId ? { ...ad, total_impressions: (ad.total_impressions || 0) + 1 } : ad
-        )
-      }))
-    },
-
-    trackAdClick: async (adId) => {
-      setData(prev => ({
-        ...prev,
-        advertisements: prev.advertisements.map(ad =>
-          ad.id === adId ? { ...ad, total_clicks: (ad.total_clicks || 0) + 1 } : ad
-        )
-      }))
-    }
+    trackAdImpression,
+    trackAdClick
   }
 
   return (

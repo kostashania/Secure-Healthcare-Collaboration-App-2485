@@ -2,24 +2,46 @@ import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { DataProvider } from './contexts/DataContext'
+
 import AuthForm from './components/Auth/AuthForm'
 import Header from './components/Layout/Header'
 import Navigation from './components/Layout/Navigation'
 import AdvertisementBanner from './components/Layout/AdvertisementBanner'
+
+// Dashboard Components
 import Dashboard from './components/Dashboard/Dashboard'
-import DocumentManager from './components/Documents/DocumentManager'
-import TaskManager from './components/Tasks/TaskManager'
+
+// Document Components
+import AdvancedDocumentManager from './components/Documents/AdvancedDocumentManager'
+
+// Task Components
+import EnhancedTaskManager from './components/Tasks/EnhancedTaskManager'
+
+// Calendar Components
 import AppointmentCalendar from './components/Calendar/AppointmentCalendar'
-import TeamManager from './components/Team/TeamManager'
+
+// Connection Components
+import ConnectionManager from './components/Connections/ConnectionManager'
+
+// Patient Components
+import PatientManagement from './components/Patients/PatientManagement'
+
+// Examination Rooms
+import RoomManager from './components/ExaminationRooms/RoomManager'
+
+// Admin Components
 import AdminDashboard from './components/Admin/AdminDashboard'
 import AdminUsers from './components/Admin/AdminUsers'
 import AdminAdvertisements from './components/Admin/AdminAdvertisements'
 import AdminAnalytics from './components/Admin/AdminAnalytics'
 import AdminSettings from './components/Admin/AdminSettings'
+
+// Sponsor Components
 import SponsorDashboard from './components/Sponsor/SponsorDashboard'
-import PatientManagement from './components/Patients/PatientManagement'
+
 import './App.css'
 
 const AppContent = () => {
@@ -69,6 +91,10 @@ const AppContent = () => {
           return <AdminAdvertisements />
         case 'analytics':
           return <AdminAnalytics />
+        case 'document-types':
+          return <AdvancedDocumentManager />
+        case 'rooms':
+          return <RoomManager />
         case 'settings':
           return <AdminSettings />
         default:
@@ -94,15 +120,18 @@ const AppContent = () => {
       case 'dashboard':
         return <Dashboard onNavigate={setActiveTab} />
       case 'documents':
-        return <DocumentManager />
+        return <AdvancedDocumentManager />
       case 'tasks':
-        return <TaskManager />
+        return <EnhancedTaskManager />
       case 'appointments':
         return <AppointmentCalendar />
-      case 'team':
-        return <TeamManager />
+      case 'connections':
+      case 'requests':
+        return <ConnectionManager />
       case 'patients':
         return <PatientManagement />
+      case 'rooms':
+        return <RoomManager />
       default:
         return <Dashboard onNavigate={setActiveTab} />
     }
@@ -112,12 +141,10 @@ const AppContent = () => {
     <DataProvider>
       <div className="min-h-screen bg-gray-50 pb-20 sm:pb-0">
         <Header />
-        
         <div className="flex flex-col sm:flex-row">
           <div className="sm:w-64 sm:min-h-screen">
             <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
           </div>
-          
           <main className="flex-1 p-4 sm:p-6">
             <motion.div
               key={activeTab}
